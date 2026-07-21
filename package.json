@@ -1,0 +1,13 @@
+{
+  "name": "ups-logistics-portal",
+  "version": "1.0.0",
+  "description": "UPS Logistics Portal - Shipment Tracking Web Application Prototype",
+  "scripts": {
+    "dev": "vite --host",
+    "build": "vite build",
+    "peek": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^5.2.0"
+  }
+}

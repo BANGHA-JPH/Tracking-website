@@ -1,0 +1,852 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UPS Logistics Portal - Shipment Tracking Dashboard</title>
+  
+  <!-- FontAwesome for Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Leaflet Map CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+  
+  <!-- Custom Styling -->
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+  <div class="app-wrapper">
+    <!-- Main Sticky Navigation Header -->
+    <header class="app-header">
+      <div class="header-brand">
+        <a href="#home" class="header-brand">
+          <div class="logo-icon">UPS</div>
+          <span class="brand-name">Logistics Portal</span>
+        </a>
+      </div>
+      
+      <!-- Public Landing Navigation -->
+      <nav id="header-nav-public" class="header-nav">
+        <a href="#home" class="nav-link active">Home</a>
+        <a href="#tracking" class="nav-link" id="nav-public-track">Track Shipment</a>
+      </nav>
+      
+      <!-- Top header actions & user profiles / role controls -->
+      <div class="header-actions">
+        <!-- Floating Role Switcher for Demo Purposes (WOW factor) -->
+        <div class="role-switcher-container">
+          <button class="role-toggle-btn active" id="btn-role-visitor" data-role="visitor">Visitor</button>
+          <button class="role-toggle-btn" id="btn-role-customer" data-role="customer">Customer</button>
+          <button class="role-toggle-btn" id="btn-role-admin" data-role="admin">Admin</button>
+        </div>
+
+        <div class="header-user-widget" id="header-user-block" style="display: none;">
+          <button class="notification-bell">
+            <i class="fa-regular fa-bell"></i>
+            <span class="bell-badge"></span>
+          </button>
+          
+          <button class="user-profile-btn">
+            <div class="user-avatar" id="header-user-avatar">JD</div>
+            <span class="user-name" id="header-user-name">John Doe</span>
+          </button>
+        </div>
+        
+        <div id="header-auth-buttons">
+          <a href="#login" class="btn btn-secondary">Login</a>
+          <a href="#tracking" class="btn btn-primary">Track Shipment</a>
+        </div>
+      </div>
+    </header>
+
+    <div class="app-body">
+      <!-- Sidebar - Visible only dynamically on internal pages -->
+      <aside class="app-sidebar" id="app-sidebar" style="display: none;">
+        <!-- Customer Navigation Menu -->
+        <ul class="sidebar-menu" id="sidebar-menu-customer">
+          <li>
+            <a href="#dashboard" class="sidebar-item active">
+              <i class="fa-solid fa-chart-pie"></i> Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="#tracking" class="sidebar-item">
+              <i class="fa-solid fa-truck-fast"></i> Tracking
+            </a>
+          </li>
+        </ul>
+        
+        <!-- Admin Navigation Menu -->
+        <ul class="sidebar-menu" id="sidebar-menu-admin" style="display: none;">
+          <li>
+            <a href="#admin" class="sidebar-item">
+              <i class="fa-solid fa-gauge-high"></i> Dashboard
+            </a>
+          </li>
+          <li>
+            <a href="#appointment" class="sidebar-item">
+              <i class="fa-solid fa-calendar-plus"></i> Shipping Appointment
+            </a>
+          </li>
+        </ul>
+        
+        <div class="sidebar-footer">
+          <p>© 2026 UPS Logistics</p>
+          <p>Prototype v1.0</p>
+        </div>
+      </aside>
+
+      <!-- Main Pages Content Area -->
+      <main class="main-content">
+
+        <!-- ==============================================
+             1. LANDING PAGE
+             ============================================== -->
+        <section id="landing-page" class="page-view active landing-view">
+          <div class="hero-section">
+            <div class="hero-content">
+              <div class="hero-tag">UPS Smart Logistics Solutions</div>
+              <h1 class="hero-title">Track Your Shipment Anytime, Anywhere</h1>
+              <p class="hero-desc">
+                We provide secure shipment tracking, logistics management, and real-time shipment updates through an easy-to-use customer portal. Revisit routes, speed, and updates instantly.
+              </p>
+              <div class="hero-ctas">
+                <a href="#login" class="btn btn-dark">Login to Portal</a>
+                <a href="#tracking" class="btn btn-primary">Track Shipment</a>
+              </div>
+            </div>
+            <div class="hero-graphic">
+              <div class="hero-circle-background"></div>
+              <!-- Simulated premium graphic image -->
+              <img src="https://images.unsplash.com/photo-1586528116311-ad8dd3c8310d?auto=format&fit=crop&q=80&w=600" alt="Logistics Warehouse" class="hero-illustration">
+            </div>
+          </div>
+
+          <div class="services-section">
+            <div class="section-container">
+              <div class="section-header">
+                <h2 class="section-title">Our Services</h2>
+                <p class="section-desc">Enterprise solutions tailored to simplify supply chain tracking and delivery optimization.</p>
+              </div>
+              
+              <div class="services-grid">
+                <div class="card service-card">
+                  <div class="service-icon-box">
+                    <i class="fa-solid fa-magnifying-glass-location"></i>
+                  </div>
+                  <h3 class="service-name">Shipment Tracking</h3>
+                  <p class="step-desc">Retrieve absolute real-time verification and logistics detail reports with a tracking ID.</p>
+                </div>
+                
+                <div class="card service-card">
+                  <div class="service-icon-box">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                  </div>
+                  <h3 class="service-name">Live Shipment Monitoring</h3>
+                  <p class="step-desc">View map timelines, customized transit route details, and active carrier locations.</p>
+                </div>
+                
+                <div class="card service-card">
+                  <div class="service-icon-box">
+                    <i class="fa-solid fa-shield-halved"></i>
+                  </div>
+                  <h3 class="service-name">Fast & Secure Delivery</h3>
+                  <p class="step-desc">Strict security compliance protocols and express air, freight, or road transit systems.</p>
+                </div>
+                
+                <div class="card service-card">
+                  <div class="service-icon-box">
+                    <i class="fa-solid fa-cubes"></i>
+                  </div>
+                  <h3 class="service-name">Logistics Solutions</h3>
+                  <p class="step-desc">Optimize delivery points, schedules, and custom clearance workflows for business needs.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="how-it-works-section">
+            <div class="section-container">
+              <div class="section-header">
+                <h2 class="section-title">How It Works</h2>
+                <p class="section-desc">Follow these simple steps from registration to secure arrival.</p>
+              </div>
+              
+              <div class="flow-container">
+                <div class="flow-step">
+                  <div class="step-num">1</div>
+                  <h3 class="step-title">Shipment Registered</h3>
+                  <p class="step-desc">Admin inputs logistics description and schedules coordinates.</p>
+                </div>
+                
+                <div class="flow-connector"><i class="fa-solid fa-arrow-right"></i></div>
+                
+                <div class="flow-step">
+                  <div class="step-num">2</div>
+                  <h3 class="step-title">Customer Receives Login</h3>
+                  <p class="step-desc">Secure credential notification sent to user profile email.</p>
+                </div>
+                
+                <div class="flow-connector"><i class="fa-solid fa-arrow-right"></i></div>
+                
+                <div class="flow-step">
+                  <div class="step-num">3</div>
+                  <h3 class="step-title">Customer Logs In</h3>
+                  <p class="step-desc">Sign in securely anywhere via desk or mobile view.</p>
+                </div>
+                
+                <div class="flow-connector"><i class="fa-solid fa-arrow-right"></i></div>
+                
+                <div class="flow-step">
+                  <div class="step-num">4</div>
+                  <h3 class="step-title">Track Shipment</h3>
+                  <p class="step-desc">View interactive route animations and progress states.</p>
+                </div>
+                
+                <div class="flow-connector"><i class="fa-solid fa-arrow-right"></i></div>
+                
+                <div class="flow-step">
+                  <div class="step-num">5</div>
+                  <h3 class="step-title">Package Delivered</h3>
+                  <p class="step-desc">Carrier handoff completed with verified signature receipts.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <footer class="landing-footer">
+            <div class="footer-container">
+              <div class="header-brand">
+                <div class="logo-icon">UPS</div>
+                <span class="brand-name" style="color: #FFFFFF;">Logistics Portal</span>
+              </div>
+              
+              <nav class="footer-nav">
+                <a href="#home">Home</a>
+                <a href="#tracking">Track</a>
+                <a href="#login">Login</a>
+                <a href="#">Privacy Policy</a>
+              </nav>
+              
+              <div class="footer-copyright">
+                <p>© 2026 UPS Logistics Portal. Designed for Enterprise Solutions.</p>
+              </div>
+            </div>
+          </footer>
+        </section>
+
+
+        <!-- ==============================================
+             2. LOGIN PAGE
+             ============================================== -->
+        <section id="login-page" class="page-view login-view">
+          <div class="login-card">
+            <div class="login-header">
+              <div class="logo-icon">UPS</div>
+              <h2 class="login-title">Log in to your Account</h2>
+            </div>
+            
+            <form class="login-form" id="login-form">
+              <div class="form-group">
+                <label for="login-email" class="form-label">Email Address</label>
+                <input type="email" id="login-email" class="form-input" placeholder="name@company.com" required value="customer@ups.com">
+              </div>
+              
+              <div class="form-group">
+                <label for="login-password" class="form-label">Password</label>
+                <input type="password" id="login-password" class="form-input" placeholder="••••••••" required value="password123">
+              </div>
+              
+              <div class="form-row">
+                <label class="remember-me">
+                  <input type="checkbox" checked> Remember Me
+                </label>
+                <a href="#" class="forgot-password-link">Forgot Password?</a>
+              </div>
+              
+              <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 8px;">Log In</button>
+            </form>
+          </div>
+        </section>
+
+
+        <!-- ==============================================
+             3. CUSTOMER DASHBOARD
+             ============================================== -->
+        <div id="customer-dashboard-view" class="dashboard-layout page-view">
+          <div class="dashboard-content-area">
+            <div class="dashboard-header">
+              <h1 class="dashboard-title">Welcome Back, <span id="span-customer-name">Valued Customer</span></h1>
+              <p class="dashboard-subtitle">Monitor and review your registered incoming cargo logistics.</p>
+            </div>
+            
+            <!-- Statistical dashboard cards -->
+            <div class="stats-grid">
+              <div class="card stat-card stat-total">
+                <div class="stat-info">
+                  <span class="stat-label">Total Shipments</span>
+                  <span class="stat-value" id="dash-stat-total">0</span>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-boxes-stacked"></i></div>
+              </div>
+              
+              <div class="card stat-card stat-transit">
+                <div class="stat-info">
+                  <span class="stat-label">In Transit</span>
+                  <span class="stat-value" id="dash-stat-transit">0</span>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-truck-fast"></i></div>
+              </div>
+              
+              <div class="card stat-card stat-delivered">
+                <div class="stat-info">
+                  <span class="stat-label">Delivered</span>
+                  <span class="stat-value" id="dash-stat-delivered">0</span>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+              </div>
+              
+              <div class="card stat-card stat-pending">
+                <div class="stat-info">
+                  <span class="stat-label">Pending</span>
+                  <span class="stat-value" id="dash-stat-pending">0</span>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+              </div>
+            </div>
+
+            <!-- Recent Shipment Cards Area -->
+            <div class="card">
+              <h2 class="card-title">Latest Shipment Cargo</h2>
+              <div id="recent-shipment-container">
+                <!-- Javascript will load detailed active recent shipment components here -->
+                <div class="recent-shipment-card" id="recent-shipment-info">
+                  <div class="recent-grid">
+                    <div class="recent-info-block">
+                      <span class="recent-info-lbl">Tracking Number</span>
+                      <span class="recent-info-val" id="recent-tracking-id">UPS-N/A</span>
+                    </div>
+                    <div class="recent-grid-col-right">
+                      <div class="recent-info-block">
+                        <span class="recent-info-lbl">Estimated Delivery</span>
+                        <span class="recent-info-val" id="recent-eta">--</span>
+                      </div>
+                    </div>
+                    <div class="recent-info-block">
+                      <span class="recent-info-lbl">Current Location</span>
+                      <span class="recent-info-val" id="recent-loc">--</span>
+                    </div>
+                    <div class="recent-info-block">
+                      <span class="recent-info-lbl">Logistics Status</span>
+                      <div id="recent-status-badge">
+                        <span class="status-badge badge-registered">Registered</span>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div class="recent-footer">
+                    <div style="font-size: 0.85rem; color: var(--color-text-secondary);">
+                      <strong>Transport:</strong> <span id="recent-transport-type">Plane</span> | 
+                      <strong>Carrier Weight:</strong> <span id="recent-weight">0</span> lbs
+                    </div>
+                    <button class="btn btn-primary" id="btn-quick-track">
+                      <i class="fa-solid fa-map-location-dot"></i> Quick Track Live Map
+                    </button>
+                  </div>
+                </div>
+                <!-- fallback fallback empty view -->
+                <p id="recent-shipment-empty" style="display: none; text-align: center; color: var(--color-text-muted); padding: 20px;">
+                  No shipments registered under this customer account. Visit Tracking to look up open orders.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ==============================================
+             4. TRACKING LIST VIEW
+             ============================================== -->
+        <div id="tracking-list-view" class="dashboard-layout page-view">
+          <div class="dashboard-content-area bg-light">
+            <div class="dashboard-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+              <div>
+                <h1 class="dashboard-title">Track Shipment Cargo</h1>
+                <p class="dashboard-subtitle">Review active coordinates, estimated dates, and actions.</p>
+              </div>
+              <div style="display: flex; gap: 12px;">
+                <input type="text" id="input-tracking-search" class="form-input" placeholder="Search tracking #..." style="width: 250px;">
+                <button class="btn btn-dark" id="btn-tracking-search"><i class="fa-solid fa-magnifying-glass"></i> Search</button>
+              </div>
+            </div>
+            
+            <div class="card">
+              <div class="table-responsive">
+                <table class="portal-table" id="table-customer-shipments">
+                  <thead>
+                    <tr>
+                      <th>Tracking Number</th>
+                      <th>Origin</th>
+                      <th>Destination</th>
+                      <th>Logistics Status</th>
+                      <th>Estimated Delivery</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="tbody-customer-shipments">
+                    <!-- Script will load client shipment listing rows -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ==============================================
+             5. SHIPMENT DETAILS PAGE
+             ============================================== -->
+        <div id="shipment-details-view" class="dashboard-layout page-view">
+          <div class="dashboard-content-area">
+            <div class="dashboard-header" style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+              <div>
+                <a href="#tracking" class="btn btn-secondary" style="margin-bottom: 12px; padding: 6px 12px; font-size: 0.8rem;">
+                  <i class="fa-solid fa-arrow-left"></i> Back to Shipments
+                </a>
+                <h1 class="dashboard-title">Cargo Transit Details</h1>
+                <p class="dashboard-subtitle" style="display: flex; align-items: center; gap: 8px;">
+                  Tracking ID: <span class="tr-bold" id="detail-tracking-title">UPS-123456789</span>
+                  <span id="detail-status-pill"></span>
+                </p>
+              </div>
+              <div>
+                <button class="btn btn-secondary" id="btn-refresh-shipment-details">
+                  <i class="fa-solid fa-arrows-rotate"></i> Refresh View
+                </button>
+              </div>
+            </div>
+
+            <div class="details-grid">
+              <!-- Top Shipment Specs -->
+              <div class="card top-info-card">
+                <div class="recent-info-block">
+                  <span class="recent-info-lbl">Origin</span>
+                  <span class="recent-info-val" id="detail-origin">--</span>
+                </div>
+                <div class="recent-info-block">
+                  <span class="recent-info-lbl">Destination</span>
+                  <span class="recent-info-val" id="detail-destination">--</span>
+                </div>
+                <div class="recent-info-block">
+                  <span class="recent-info-lbl">Current Location (Live)</span>
+                  <span class="recent-info-val" id="detail-current-location" style="color: var(--color-primary-dark); font-weight: 700;">--</span>
+                </div>
+                <div class="recent-info-block">
+                  <span class="recent-info-lbl">Estimated Arrival</span>
+                  <span class="recent-info-val" id="detail-eta">--</span>
+                </div>
+                <div class="recent-info-block">
+                  <span class="recent-info-lbl">Weight & Package Spec</span>
+                  <span class="recent-info-val" id="detail-specs">--</span>
+                </div>
+                <div class="recent-info-block">
+                  <span class="recent-info-lbl">Transit Vessel</span>
+                  <span class="recent-info-val" id="detail-vessel">--</span>
+                </div>
+              </div>
+
+              <!-- Shipment Timeline stepper -->
+              <div class="card stepper-container">
+                <h3 class="form-section-title" style="margin-bottom: 24px;">Shipment Timeline Progress</h3>
+                <div class="stepper">
+                  <div class="stepper-progress" id="timeline-progress-bar"></div>
+                  
+                  <div class="step-node" id="step-0">
+                    <div class="step-dot"><i class="fa-solid fa-file-contract"></i></div>
+                    <div class="step-lbl">Registered</div>
+                  </div>
+                  
+                  <div class="step-node" id="step-1">
+                    <div class="step-dot"><i class="fa-solid fa-boxes-packing"></i></div>
+                    <div class="step-lbl">Picked Up</div>
+                  </div>
+                  
+                  <div class="step-node" id="step-2">
+                    <div class="step-dot"><i class="fa-solid fa-warehouse"></i></div>
+                    <div class="step-lbl">Warehouse</div>
+                  </div>
+                  
+                  <div class="step-node" id="step-3">
+                    <div class="step-dot"><i class="fa-solid fa-truck-ramp-box"></i></div>
+                    <div class="step-lbl">In Transit</div>
+                  </div>
+                  
+                  <div class="step-node" id="step-4">
+                    <div class="step-dot"><i class="fa-solid fa-passport"></i></div>
+                    <div class="step-lbl">Customs</div>
+                  </div>
+                  
+                  <div class="step-node" id="step-5">
+                    <div class="step-dot"><i class="fa-solid fa-plane-arrival"></i></div>
+                    <div class="step-lbl">Dest. Country</div>
+                  </div>
+
+                  <div class="step-node" id="step-6">
+                    <div class="step-dot"><i class="fa-solid fa-truck-local"></i></div>
+                    <div class="step-lbl">Out for Delivery</div>
+                  </div>
+
+                  <div class="step-node" id="step-7">
+                    <div class="step-dot"><i class="fa-solid fa-handshake"></i></div>
+                    <div class="step-lbl">Delivered</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Split Container: Large interactive Leaflet map & Side panel -->
+              <div class="map-view-wrapper">
+                <div class="interactive-map-container" id="tracking-detail-map">
+                  <!-- Leaflet maps mounts dynamically -->
+                  <div style="position: absolute; top: 12px; left: 60px; z-index: 1000; background: rgba(53, 28, 21, 0.95); color: #fff; padding: 6px 12px; border-radius: var(--border-radius-sm); font-size: 0.8rem; pointer-events: none; border-bottom: 2px solid var(--color-primary);">
+                    <i class="fa-solid fa-signal" style="color: var(--color-primary); margin-right: 6px;"></i> Live GPS Stream Connected
+                  </div>
+                </div>
+                
+                <div class="side-details-panel">
+                  <div class="recent-info-block">
+                    <span class="recent-info-lbl">Telemetry Info</span>
+                    <h3 id="panel-live-status-txt" style="color: var(--color-primary-dark); font-weight: 800;">Realtime Update</h3>
+                  </div>
+                  
+                  <div class="recent-info-block">
+                    <span class="recent-info-lbl">Current Location Coords</span>
+                    <span class="recent-info-val" id="panel-live-coords" style="font-family: monospace; font-size: 0.9rem;">-- / --</span>
+                  </div>
+                  
+                  <div class="recent-info-block">
+                    <span class="recent-info-lbl">Feedback Log</span>
+                    <span class="recent-info-val" id="panel-live-log" style="font-size: 0.9rem; font-weight: 500;">--</span>
+                  </div>
+
+                  <div class="recent-info-block">
+                    <span class="recent-info-lbl">Journey Progress</span>
+                    <div style="display: flex; align-items: center; gap: 12px; margin-top: 4px;">
+                      <div style="flex: 1; height: 8px; background: #eee; border-radius: 4px; overflow: hidden;">
+                        <div id="panel-live-progress-fill" style="width: 0%; height: 100%; background: var(--color-primary-dark); transition: var(--transition-smooth);"></div>
+                      </div>
+                      <span id="panel-live-progress-pct" style="font-size: 0.85rem; font-weight: 700;">0%</span>
+                    </div>
+                  </div>
+                  
+                  <div class="recent-info-block" style="border-top:1px solid var(--color-border); padding-top:16px;">
+                    <span class="recent-info-lbl">Vessel Speed</span>
+                    <span class="recent-info-val" id="panel-speed-indicator" style="font-weight:700;">- km/h</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ==============================================
+             6. ADMIN DASHBOARD
+             ============================================== -->
+        <div id="admin-dashboard-view" class="dashboard-layout page-view">
+          <div class="dashboard-content-area">
+            <div class="dashboard-header">
+              <h1 class="dashboard-title">Operations Control Center</h1>
+              <p class="dashboard-subtitle">Global administrative statistics and recent cargo shipments.</p>
+            </div>
+            
+            <div class="stats-grid admin-metrics">
+              <div class="card stat-card stat-total">
+                <div class="stat-info">
+                  <span class="stat-label">Total Customers</span>
+                  <span class="stat-value" id="admin-stat-customers">0</span>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-users"></i></div>
+              </div>
+              
+              <div class="card stat-card stat-pending">
+                <div class="stat-info">
+                  <span class="stat-label">Active Shipments</span>
+                  <span class="stat-value" id="admin-stat-shipments">0</span>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-box"></i></div>
+              </div>
+              
+              <div class="card stat-card stat-transit">
+                <div class="stat-info">
+                  <span class="stat-label">In Transit</span>
+                  <span class="stat-value" id="admin-stat-transit">0</span>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-truck-fast"></i></div>
+              </div>
+              
+              <div class="card stat-card stat-delivered">
+                <div class="stat-info">
+                  <span class="stat-label">Delivered Cargo</span>
+                  <span class="stat-value" id="admin-stat-delivered">0</span>
+                </div>
+                <div class="stat-icon"><i class="fa-solid fa-circle-check"></i></div>
+              </div>
+            </div>
+
+            <!-- Recent Shipments & Customers Tables split grid -->
+            <div class="admin-grid">
+              <div class="card admin-recent-card">
+                <h2 class="card-title">Recent Operational Shipments</h2>
+                <div class="table-responsive">
+                  <table class="portal-table" id="table-admin-shipments">
+                    <thead>
+                      <tr>
+                        <th>Tracking Number</th>
+                        <th>Customer</th>
+                        <th>Dest.</th>
+                        <th>Vessel</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-admin-shipments">
+                      <!-- Javascript inserts operational shipment lists -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              <div class="card admin-recent-card">
+                <h2 class="card-title">Registered Customer Directories</h2>
+                <div class="table-responsive">
+                  <table class="portal-table" id="table-admin-customers">
+                    <thead>
+                      <tr>
+                        <th>Name</th>
+                        <th>Contact Email</th>
+                        <th>Volume</th>
+                      </tr>
+                    </thead>
+                    <tbody id="tbody-admin-customers">
+                      <!-- Javascript lists customer contacts -->
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
+        <!-- ==============================================
+             7. SHIPPING APPOINTMENT & SIMULATOR PAGE
+             ============================================== -->
+        <div id="admin-appointment-view" class="dashboard-layout page-view">
+          <div class="dashboard-content-area">
+            <div class="dashboard-header">
+              <h1 class="dashboard-title">Dispatch Appointment & Control Centre</h1>
+              <p class="dashboard-subtitle">Register new customer cargo accounts and trigger real-time GPS telemetry paths.</p>
+            </div>
+
+            <div class="admin-form-container">
+              <!-- Shipment Registration Form -->
+              <div class="card">
+                <h2 class="card-title">Schedule Shipping Handoff</h2>
+                
+                <form id="appointment-form">
+                  <div class="form-section-title">Customer Coordinates</div>
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label for="appt-cust-name" class="form-label">Customer Name</label>
+                      <input type="text" id="appt-cust-name" class="form-input" placeholder="e.g. Johnathan Doe" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="appt-cust-email" class="form-label">Email Address</label>
+                      <input type="email" id="appt-cust-email" class="form-input" placeholder="customer@email.com" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="appt-cust-phone" class="form-label">Phone Number</label>
+                      <input type="text" id="appt-cust-phone" class="form-input" placeholder="e.g. +1 555 0199" required>
+                    </div>
+                    <div class="form-group">
+                      <label for="appt-cust-address" class="form-label">Delivery Address</label>
+                      <input type="text" id="appt-cust-address" class="form-input" placeholder="e.g. 100 Main St, Chicago IL" required>
+                    </div>
+                  </div>
+                  
+                  <div class="form-section-title" style="margin-top: 24px;">Shipment Metrics</div>
+                  <div class="form-grid">
+                    <div class="form-group">
+                      <label for="appt-tracking" class="form-label">Tracking ID (Auto Generated)</label>
+                      <input type="text" id="appt-tracking" class="form-input" readonly style="background-color: var(--color-bg-main); font-weight: 700; color: var(--color-primary-dark);">
+                    </div>
+                    
+                    <div class="form-group">
+                      <label for="appt-vessel" class="form-label">Transport Type</label>
+                      <select id="appt-vessel" class="form-input">
+                        <option value="Truck">Truck Carrier</option>
+                        <option value="Plane">Cargo Jet (Flight)</option>
+                        <option value="Ship">container Vessel</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="appt-origin" class="form-label">Origin Location</label>
+                      <input type="text" id="appt-origin" class="form-input" placeholder="e.g. Chicago, IL" required>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="appt-destination" class="form-label">Destination Location</label>
+                      <input type="text" id="appt-destination" class="form-input" placeholder="e.g. Seattle, WA" required>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="appt-weight" class="form-label">Cargo Weight (lbs)</label>
+                      <input type="number" id="appt-weight" class="form-input" placeholder="e.g. 450" required>
+                    </div>
+
+                    <div class="form-group">
+                      <label for="appt-date" class="form-label">ETA Date</label>
+                      <input type="date" id="appt-date" class="form-input" required>
+                    </div>
+
+                    <div class="form-group form-grid-full">
+                      <label for="appt-desc" class="form-label">Package Description</label>
+                      <input type="text" id="appt-desc" class="form-input" placeholder="Hardware units, medical devices, perishable items etc..." required>
+                    </div>
+                    
+                    <div class="form-group form-grid-full">
+                      <label class="form-label">Package Image Handoff Documentation</label>
+                      <div class="upload-box" id="appt-upload-area">
+                        <i class="fa-solid fa-cloud-arrow-up" style="font-size: 2.2rem; margin-bottom: 8px; color: var(--color-primary-dark);"></i>
+                        <p style="font-size: 0.9rem; font-weight: 600;">Drag and drop shipment cargo photo</p>
+                        <p style="font-size: 0.75rem; color: var(--color-text-muted);">PDF, PNG, JPG accepted (max. 10MB)</p>
+                        <input type="file" id="appt-file-input" style="display: none;">
+                      </div>
+                    </div>
+                  </div>
+
+                  <button type="submit" class="btn btn-dark" style="width: 100%; border-radius: var(--border-radius-sm); margin-top: 24px; padding: 14px;">
+                    <i class="fa-solid fa-dolly"></i> Register Shipping Appointment
+                  </button>
+                </form>
+              </div>
+
+              <!-- SIMULATOR AND TELEMETRY CONFIG PANEL -->
+              <div class="card simulator-panel">
+                <h2 class="card-title">Live Tracking Simulation</h2>
+                <div style="font-size: 0.85rem; color: var(--color-text-secondary); margin-top: -16px; margin-bottom: 12px;">
+                  Active Tracking ID: <strong id="sim-active-id" style="color: var(--color-primary-dark);">UPS-123456789</strong>
+                </div>
+
+                <!-- Interactive Preview Route Map -->
+                <div style="height: 220px; width: 100%; border-radius: var(--border-radius-sm); background: #eee; overflow: hidden; border:1px solid var(--color-border); position: relative;">
+                  <div id="admin-sim-map" style="height:100%; width:100%;"></div>
+                  <div style="position: absolute; bottom: 8px; right: 8px; z-index: 1000; background: rgba(255,255,255,0.9); font-size: 0.75rem; padding: 3px 6px; border-radius: 4px; font-weight: 600;">
+                    Live Sim Preview
+                  </div>
+                </div>
+
+                <!-- Waypoint selection controls -->
+                <div>
+                  <div class="form-section-title">GPS Route Stops & Autocomplete</div>
+                  <div class="route-selector-grid">
+                    <div class="route-waypoint">
+                      <label class="form-label" style="font-size: 0.8rem;">Origin Stop</label>
+                      <select id="sim-waypoint-start">
+                        <option value="NY">New York (JFK)</option>
+                        <option value="CHI" selected>Chicago (ORD)</option>
+                        <option value="MIA">Miami (MIA)</option>
+                      </select>
+                    </div>
+                    <div class="route-waypoint">
+                      <label class="form-label" style="font-size: 0.8rem;">Stop 1</label>
+                      <select id="sim-waypoint-1">
+                        <option value="CLE">Cleveland, OH</option>
+                        <option value="KC" selected>Kansas City, MO</option>
+                        <option value="ATL">Atlanta, GA</option>
+                      </select>
+                    </div>
+                    <div class="route-waypoint">
+                      <label class="form-label" style="font-size: 0.8rem;">Stop 2</label>
+                      <select id="sim-waypoint-2">
+                        <option value="DEN" selected>Denver, CO</option>
+                        <option value="DAL">Dallas, TX</option>
+                        <option value="PHX">Phoenix, AZ</option>
+                      </select>
+                    </div>
+                    <div class="route-waypoint">
+                      <label class="form-label" style="font-size: 0.8rem;">Destination</label>
+                      <select id="sim-waypoint-end">
+                        <option value="LA">Los Angeles (LAX)</option>
+                        <option value="SEA" selected>Seattle (SEA)</option>
+                        <option value="SF">San Francisco (SFO)</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="form-section-title">Simulation Control Panel</div>
+                  <div class="simulation-controls-row">
+                    <button class="btn btn-primary" id="btn-sim-start"><i class="fa-solid fa-play"></i> Start</button>
+                    <button class="btn btn-secondary" id="btn-sim-pause" disabled><i class="fa-solid fa-pause"></i> Pause</button>
+                    <button class="btn btn-secondary" id="btn-sim-stop" disabled><i class="fa-solid fa-stop"></i> Stop</button>
+                    <button class="btn btn-secondary" id="btn-sim-reset"><i class="fa-solid fa-arrow-rotate-left"></i> Reset</button>
+                  </div>
+                </div>
+
+                <div>
+                  <div class="form-section-title">Manual Position Controls</div>
+                  <div class="position-controls-grid">
+                    <button class="btn btn-secondary" id="btn-sim-back"><i class="fa-solid fa-chevron-left"></i> Shift Back</button>
+                    <button class="btn btn-secondary" id="btn-sim-forward">Shift Forward <i class="fa-solid fa-chevron-right"></i></button>
+                    <button class="btn btn-secondary" id="btn-sim-prev-wp"><i class="fa-solid fa-angles-left"></i> Jump Prev Stop</button>
+                    <button class="btn btn-secondary" id="btn-sim-next-wp">Jump Next Stop <i class="fa-solid fa-angles-right"></i></button>
+                  </div>
+                </div>
+
+                <!-- Simulation Speed controls -->
+                <div class="slider-group">
+                  <div class="slider-lbl-row">
+                    <span>GPS Telemetry Speed</span>
+                    <span id="txt-sim-speed">1x (Normal)</span>
+                  </div>
+                  <input type="range" class="range-slider" id="slider-sim-speed" min="1" max="10" value="1">
+                </div>
+
+                <div>
+                  <div class="form-section-title">Set Shipping Milestone (Live Update)</div>
+                  <div class="form-group">
+                    <select id="sim-status-dropdown" class="form-input" style="padding: 10px;">
+                      <option value="Registered">Registered</option>
+                      <option value="Picked Up">Picked Up</option>
+                      <option value="Warehouse">Warehouse Processing</option>
+                      <option value="In Transit">In Transit</option>
+                      <option value="Customs">Customs Clearance</option>
+                      <option value="Destination Country">Destination Country Arrival</option>
+                      <option value="Out for Delivery">Out for Delivery</option>
+                      <option value="Delivered">Package Delivered</option>
+                    </select>
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- Leaflet Map JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  
+  <!-- SPA Logic Script -->
+  <script type="module" src="/app.js"></script>
+
+</body>
+</html>
