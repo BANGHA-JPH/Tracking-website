@@ -7,13 +7,15 @@ import {
   SlidersHorizontal, Download, Printer, Search, Trash
 } from 'lucide-react';
 
-const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
-  ? 'http://127.0.0.1:5000/api' 
-  : `${window.location.origin}/api`;
+const API_BASE = import.meta.env.VITE_API_BASE || 
+  ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+    ? 'http://127.0.0.1:5000/api' 
+    : `${window.location.origin}/api`);
 
-const WS_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
-  ? 'ws://127.0.0.1:5000' 
-  : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`;
+const WS_BASE = import.meta.env.VITE_WS_BASE || 
+  ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') 
+    ? 'ws://127.0.0.1:5000' 
+    : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}`);
 
 const GPS_COORDINATES = {
   'CHI': [41.8781, -87.6298], // Chicago
