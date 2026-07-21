@@ -1,5 +1,6 @@
 import express from 'express';
 import { Customer, Shipment } from '../db/models.js';
+import { sendEmail } from '../services/emailService.js';
 
 const router = express.Router();
 
@@ -283,6 +284,44 @@ router.delete('/shipments/:id', async (req, res) => {
   } catch (error) {
     console.error('Error deleting shipment:', error);
     res.status(500).json({ error: 'Database delete failure.' });
+  }
+});
+
+// 8. Admin Direct Email Dispatch Endpoint
+router.post('/admin/send-email', async (req, res) => {
+  const { toEmail, recipientName, subject, messageBody, templateType, shipmentId, buttonUrl } = req.body;
+
+  if (!toEmail || !toEmail.trim()) {
+    return res.status(400).json({ error: 'Recipient email address is required.' });
+  }
+  if (!messageBody || !messageBody.trim()) {
+    return res.status(400).json({ error: 'Message body cannot be empty.' });
+  }
+
+  try {
+    let shipmentData = null;
+    if (shipmentId) {
+      shipmentData = await Shipment.findOne({ id: shipmentId.toUpperCase() });
+    }
+
+    const result = await sendEmail({
+      to: toEmail.trim().toLowerCase(),
+      recipientName: recipientName,
+      subject: subject,
+      messageBody: messageBody,
+      templateType: templateType,
+      shipment: shipmentData,
+      buttonUrl: buttonUrl
+    });
+
+    res.json({
+      success: true,
+      message: result.simulated ? 'Email simulated in backend console.' : 'Email sent successfully via Resend API.',
+      id: result.id
+    });
+  } catch (error) {
+    console.error('Error sending email:', error);
+    res.status(500).json({ error: error.message || 'Failed to dispatch email.' });
   }
 });
 

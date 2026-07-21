@@ -164,6 +164,340 @@ const LeafletMap = ({ shipment }) => {
   );
 };
 
+const EmailCenterView = ({ shipments, API_BASE }) => {
+  const [recipientEmail, setRecipientEmail] = useState('');
+  const [recipientName, setRecipientName] = useState('');
+  const [selectedShipmentId, setSelectedShipmentId] = useState('');
+  const [templateType, setTemplateType] = useState('CUSTOM_NOTICE');
+  const [subject, setSubject] = useState('');
+  const [messageBody, setMessageBody] = useState('');
+  const [sending, setSending] = useState(false);
+  const [feedback, setFeedback] = useState({ type: '', text: '' });
+
+  const handleSelectShipment = (shipmentId) => {
+    setSelectedShipmentId(shipmentId);
+    if (!shipmentId) return;
+    const shipment = shipments.find(s => s.id === shipmentId);
+    if (shipment) {
+      if (shipment.customerEmail) setRecipientEmail(shipment.customerEmail);
+      if (shipment.customerName) setRecipientName(shipment.customerName);
+      applyTemplate(templateType, shipment);
+    }
+  };
+
+  const applyTemplate = (type, shipment = null) => {
+    setTemplateType(type);
+    const activeShipment = shipment || shipments.find(s => s.id === selectedShipmentId);
+    const code = activeShipment?.id || '[TRACKING_CODE]';
+
+    if (type === 'SHIPMENT_UPDATE') {
+      setSubject(`Shipment Update: UPS Package #${code}`);
+      setMessageBody(`Your package #${code} has been updated to "${activeShipment?.status || 'In Transit'}". Current location: ${activeShipment?.currentLocationName || activeShipment?.origin || 'Hub'}.`);
+    } else if (type === 'OUT_FOR_DELIVERY') {
+      setSubject(`Out for Delivery: UPS Package #${code}`);
+      setMessageBody(`Great news! Your UPS package #${code} is out for final delivery today. Please ensure someone is available to receive the package.`);
+    } else if (type === 'DELAY_NOTICE') {
+      setSubject(`Important Notice: Update on UPS Package #${code}`);
+      setMessageBody(`We wanted to notify you that shipment #${code} is experiencing a slight delay due to logistics processing. Our team is actively resolving this to deliver your package as soon as possible.`);
+    } else {
+      setSubject(`Notice regarding your UPS Shipment #${code}`);
+      setMessageBody(`Hello,\n\nWe are writing to provide an update regarding your parcel with UPS Logistics.\n\nThank you for choosing UPS Services.`);
+    }
+  };
+
+  const handleSendEmail = async (e) => {
+    e.preventDefault();
+    if (!recipientEmail || !recipientEmail.trim()) {
+      setFeedback({ type: 'error', text: 'Please provide a valid recipient email address.' });
+      return;
+    }
+    if (!messageBody || !messageBody.trim()) {
+      setFeedback({ type: 'error', text: 'Please enter a message body before sending.' });
+      return;
+    }
+
+    setSending(true);
+    setFeedback({ type: '', text: '' });
+
+    try {
+      const trackUrl = selectedShipmentId ? `${window.location.origin}/#details?id=${selectedShipmentId}` : window.location.origin;
+
+      const res = await fetch(`${API_BASE}/admin/send-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          toEmail: recipientEmail,
+          recipientName: recipientName || recipientEmail.split('@')[0],
+          subject: subject,
+          messageBody: messageBody,
+          templateType: templateType,
+          shipmentId: selectedShipmentId,
+          buttonUrl: trackUrl
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFeedback({ type: 'success', text: `Email dispatched successfully to ${recipientEmail}!` });
+      } else {
+        setFeedback({ type: 'error', text: data.error || 'Failed to send email.' });
+      }
+    } catch (err) {
+      setFeedback({ type: 'error', text: 'Error connecting to email dispatch server.' });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const selectedShipment = shipments.find(s => s.id === selectedShipmentId);
+
+  return (
+    <section className="email-center-view" style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+        <div>
+          <h2 style={{ fontSize: '1.75rem', fontWeight: '800', color: 'var(--text-primary)', margin: 0, display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <Mail style={{ color: '#ffb900' }} /> Admin Email Dispatch Center
+          </h2>
+          <p style={{ color: 'var(--text-secondary)', margin: '6px 0 0 0', fontSize: '0.9rem' }}>
+            Send transactional emails & updates directly to customers via Resend API
+          </p>
+        </div>
+        <div style={{ background: 'rgba(255, 185, 0, 0.1)', border: '1px solid #ffb900', padding: '6px 14px', borderRadius: '20px', fontSize: '0.8rem', color: '#ffb900', fontWeight: '700' }}>
+          ✓ Resend Active: support@ups-global-shipping.com
+        </div>
+      </div>
+
+      {feedback.text && (
+        <div style={{
+          padding: '12px 18px',
+          borderRadius: '8px',
+          marginBottom: '20px',
+          background: feedback.type === 'success' ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+          border: `1px solid ${feedback.type === 'success' ? '#22c55e' : '#ef4444'}`,
+          color: feedback.type === 'success' ? '#4ade80' : '#f87171',
+          fontWeight: '600',
+          fontSize: '0.9rem'
+        }}>
+          {feedback.type === 'success' ? '✓ ' : '⚠️ '}{feedback.text}
+        </div>
+      )}
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
+        
+        {/* Left Column: Form Controls */}
+        <div style={{ background: 'var(--card-bg, #2a2521)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '24px' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#ffb900', marginTop: 0, marginBottom: '16px' }}>
+            1. Compose Email
+          </h3>
+
+          <form onSubmit={handleSendEmail} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                Link Active Shipment (Auto-Fills Customer Info)
+              </label>
+              <select
+                value={selectedShipmentId}
+                onChange={(e) => handleSelectShipment(e.target.value)}
+                style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+              >
+                <option value="">-- None (Manual Recipient) --</option>
+                {shipments.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.id} - {s.customerName || 'No Name'} ({s.customerEmail || 'No Email'})
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                  Recipient Email *
+                </label>
+                <input
+                  type="email"
+                  placeholder="customer@example.com"
+                  value={recipientEmail}
+                  onChange={(e) => setRecipientEmail(e.target.value)}
+                  required
+                  style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                  Customer Name
+                </label>
+                <input
+                  type="text"
+                  placeholder="John Doe"
+                  value={recipientName}
+                  onChange={(e) => setRecipientName(e.target.value)}
+                  style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                Preset Email Template
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                {[
+                  { id: 'SHIPMENT_UPDATE', label: '📦 Status Update' },
+                  { id: 'OUT_FOR_DELIVERY', label: '🚚 Out for Delivery' },
+                  { id: 'DELAY_NOTICE', label: '⚠️ Delay Notice' },
+                  { id: 'CUSTOM_NOTICE', label: '✉️ Custom Notice' }
+                ].map(t => (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => applyTemplate(t.id)}
+                    style={{
+                      padding: '8px',
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      border: templateType === t.id ? '1px solid #ffb900' : '1px solid var(--border-color)',
+                      background: templateType === t.id ? 'rgba(255, 185, 0, 0.15)' : 'var(--bg-secondary)',
+                      color: templateType === t.id ? '#ffb900' : 'var(--text-primary)',
+                      cursor: 'pointer',
+                      textAlign: 'center'
+                    }}
+                  >
+                    {t.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                Subject Line *
+              </label>
+              <input
+                type="text"
+                placeholder="Email Subject..."
+                value={subject}
+                onChange={(e) => setSubject(e.target.value)}
+                required
+                style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+              />
+            </div>
+
+            <div>
+              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                Message Content *
+              </label>
+              <textarea
+                rows={5}
+                placeholder="Write your email body message here..."
+                value={messageBody}
+                onChange={(e) => setMessageBody(e.target.value)}
+                required
+                style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.9rem', resize: 'vertical' }}
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={sending}
+              style={{
+                marginTop: '10px',
+                padding: '12px 20px',
+                borderRadius: '8px',
+                background: sending ? '#64748b' : 'linear-gradient(135deg, #ffb900 0%, #d89600 100%)',
+                color: '#351C15',
+                border: 'none',
+                fontWeight: '800',
+                fontSize: '0.95rem',
+                cursor: sending ? 'not-allowed' : 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px'
+              }}
+            >
+              {sending ? (
+                <>Sending Email via Resend...</>
+              ) : (
+                <>Dispatch Email Now &rarr;</>
+              )}
+            </button>
+
+          </form>
+        </div>
+
+        {/* Right Column: Live Preview */}
+        <div style={{ background: 'var(--card-bg, #2a2521)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '24px' }}>
+          <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#ffb900', marginTop: 0, marginBottom: '16px' }}>
+            2. Live Email Preview
+          </h3>
+
+          <div style={{ background: '#ffffff', color: '#333333', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+            
+            <div style={{ background: '#351C15', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: '20px', fontWeight: '800', color: '#FFB500', letterSpacing: '1px' }}>UPS</span>
+                <span style={{ fontSize: '13px', fontWeight: '600', color: '#ffffff', marginLeft: '6px', textTransform: 'uppercase' }}>Global Logistics</span>
+              </div>
+              <span style={{ fontSize: '10px', color: '#d1c7bd', textTransform: 'uppercase' }}>Official Notification</span>
+            </div>
+
+            <div style={{ background: '#fcf8f2', padding: '14px 20px', borderBottom: '2px solid #FFB500' }}>
+              <h4 style={{ margin: 0, fontSize: '15px', color: '#351C15', fontWeight: '700' }}>
+                {subject || 'Subject Line Preview'}
+              </h4>
+            </div>
+
+            <div style={{ padding: '20px' }}>
+              <p style={{ fontSize: '13px', margin: '0 0 12px 0', color: '#444444' }}>
+                Hello <strong>{recipientName || recipientEmail.split('@')[0] || 'Valued Customer'}</strong>,
+              </p>
+
+              <div style={{ fontSize: '13px', lineHeight: '1.5', color: '#444444', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
+                {messageBody || 'Your message body content will render here...'}
+              </div>
+
+              {selectedShipment && (
+                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '14px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                    <div>
+                      <span style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase' }}>Tracking Code</span><br/>
+                      <strong style={{ fontSize: '14px', color: '#351C15' }}>{selectedShipment.id}</strong>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <span style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase' }}>Status</span><br/>
+                      <span style={{ background: '#351C15', color: '#FFB500', fontWeight: '700', fontSize: '10px', padding: '2px 8px', borderRadius: '12px', textTransform: 'uppercase' }}>
+                        {selectedShipment.status}
+                      </span>
+                    </div>
+                  </div>
+                  <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '8px', fontSize: '11px', color: '#475569' }}>
+                    <strong>Route:</strong> {selectedShipment.origin || 'N/A'} &rarr; {selectedShipment.destination || 'N/A'}
+                  </div>
+                </div>
+              )}
+
+              <div style={{ textAlign: 'center', marginTop: '16px' }}>
+                <span style={{ background: '#FFB500', color: '#351C15', fontSize: '13px', fontWeight: '700', padding: '8px 20px', borderRadius: '6px', display: 'inline-block' }}>
+                  Track Live Package &rarr;
+                </span>
+              </div>
+            </div>
+
+            <div style={{ background: '#f1f5f9', padding: '12px', textAlign: 'center', borderTop: '1px solid #e2e8f0', fontSize: '10px', color: '#64748b' }}>
+              UPS Logistics Services &bull; Sent from UPS Admin Portal
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
+};
+
 
 export default function App() {
   const [user, setUser] = useState(() => {
@@ -959,6 +1293,9 @@ export default function App() {
                   </a>
                   <a href="#tracking" className={`sidebar-link ${activeTab === 'tracking' ? 'active' : ''}`}>
                     <ClipboardList className="nav-icon" /> Shipments
+                  </a>
+                  <a href="#email-center" className={`sidebar-link ${activeTab === 'email-center' ? 'active' : ''}`}>
+                    <Mail className="nav-icon" /> Email Center
                   </a>
                   <div className="sidebar-action-btn-container">
                     <button 
@@ -2726,6 +3063,10 @@ export default function App() {
               </section>
             );
           })()}
+
+          {activeTab === 'email-center' && user?.role === 'admin' && (
+            <EmailCenterView shipments={shipments} API_BASE={API_BASE} />
+          )}
 
         </main>
       </div>
