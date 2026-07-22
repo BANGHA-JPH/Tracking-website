@@ -232,7 +232,7 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
     setFeedback({ type: '', text: '' });
 
     try {
-      const trackUrl = selectedShipmentId ? `${window.location.origin}/#details?id=${selectedShipmentId}` : window.location.origin;
+      const trackUrl = `${window.location.origin}/#login`;
 
       const res = await fetch(`${API_BASE}/admin/send-email`, {
         method: 'POST',
