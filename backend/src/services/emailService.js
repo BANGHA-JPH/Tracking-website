@@ -71,7 +71,7 @@ function buildHtmlEmail({ recipientName, title, message, trackingNumber, status,
       <div style="background-color: #ffffff; border-radius: 4px; padding: 24px; border: 1px solid #e2e8f0; font-size: 13px; color: #4a5568; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         <p style="margin: 0 0 6px 0; font-weight: 700; color: #2d3748; font-size: 14px;">UPS Global Logistics Services</p>
         <p style="margin: 0 0 4px 0;">Official Transactional Notification</p>
-        <p style="margin: 0 0 12px 0;">Website: <a href="https://ups-global-shipping.com" style="color: #3182ce; text-decoration: underline;">ups-global-shipping.com</a></p>
+        <p style="margin: 0 0 12px 0;">Website: <a href="${buttonUrl || 'https://ups-global-shipping.com/#home'}" style="color: #3182ce; text-decoration: underline;">ups-global-shipping.com</a></p>
         <p style="margin: 0; color: #718096;">Email: support@ups-global-shipping.com</p>
       </div>
 

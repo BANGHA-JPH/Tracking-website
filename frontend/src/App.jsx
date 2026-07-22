@@ -596,6 +596,14 @@ export default function App() {
 
       const targetTab = rawHash.startsWith('#details?id=') ? 'details' : rawHash.replace('#', '');
       
+      // When arriving at the landing page (#home) via link, ensure session is logged out so user must sign in via Login page
+      if (targetTab === 'home' || !rawHash || rawHash === '#home') {
+        localStorage.removeItem('ups_user');
+        setUser(null);
+        setActiveTab('home');
+        return;
+      }
+
       // If user is not logged in, protected tabs automatically revert to home
       if (!user && ['admin', 'dashboard', 'appointment', 'email-center', 'tracking'].includes(targetTab)) {
         setActiveTab('home');
@@ -617,7 +625,7 @@ export default function App() {
     handleHash();
 
     return () => window.removeEventListener('hashchange', handleHash);
-  }, [user]);
+  }, []);
 
   // Auto-fetch targeted shipment if opened via direct email link
   useEffect(() => {
