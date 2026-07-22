@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 
 const getResendClient = () => {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY || 're_Lq1FCBzy_6oVWeVz73N7bJqGMhfi39cdU';
   if (!apiKey) return null;
   return new Resend(apiKey);
 };
@@ -129,6 +129,9 @@ Track package: ${defaultLink}
 UPS Global Logistics Services
 Website: ${defaultLink}
 Email: support@ups-global-shipping.com`;
+
+  const apiKey = process.env.RESEND_API_KEY || 're_Lq1FCBzy_6oVWeVz73N7bJqGMhfi39cdU';
+  const fromEmail = process.env.FROM_EMAIL || 'UPS Support <support@ups-global-shipping.com>';
 
   if (!apiKey) {
     console.warn('[EMAIL SERVICE WARNING] RESEND_API_KEY is missing in backend .env. Simulation mode only.');
