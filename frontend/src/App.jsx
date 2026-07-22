@@ -1253,17 +1253,7 @@ export default function App() {
             </div>
 
             <div className="header-ctrls-right">
-              {user ? (
-                <button 
-                  className="btn-hero-primary" 
-                  style={{ padding: '8px 18px', fontSize: '0.85rem' }}
-                  onClick={() => window.location.hash = user.role === 'admin' ? '#admin' : '#dashboard'}
-                >
-                  Go to Portal →
-                </button>
-              ) : (
-                <a href="#login" className="header-login-link">Login</a>
-              )}
+              <a href="#login" className="header-login-link">Login</a>
             </div>
           </header>
         )
