@@ -434,60 +434,37 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
             2. Live Email Preview
           </h3>
 
-          <div style={{ background: '#ffffff', color: '#333333', borderRadius: '8px', overflow: 'hidden', border: '1px solid #cbd5e1', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}>
+          <div style={{ background: '#ffffff', color: '#1f2937', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb', boxShadow: '0 4px 12px rgba(0,0,0,0.06)', padding: '24px' }}>
             
-            <div style={{ background: '#351C15', padding: '16px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <div>
-                <span style={{ fontSize: '20px', fontWeight: '800', color: '#FFB500', letterSpacing: '1px' }}>UPS</span>
-                <span style={{ fontSize: '13px', fontWeight: '600', color: '#ffffff', marginLeft: '6px', textTransform: 'uppercase' }}>Global Logistics</span>
-              </div>
-              <span style={{ fontSize: '10px', color: '#d1c7bd', textTransform: 'uppercase' }}>Official Notification</span>
+            <div style={{ borderBottom: '2px solid #351C15', paddingBottom: '12px', marginBottom: '16px' }}>
+              <span style={{ fontSize: '20px', fontWeight: '800', color: '#351C15', letterSpacing: '0.5px' }}>UPS</span>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#d89600', marginLeft: '6px', textTransform: 'uppercase' }}>Logistics</span>
             </div>
 
-            <div style={{ background: '#fcf8f2', padding: '14px 20px', borderBottom: '2px solid #FFB500' }}>
-              <h4 style={{ margin: 0, fontSize: '15px', color: '#351C15', fontWeight: '700' }}>
-                {subject || 'Subject Line Preview'}
-              </h4>
+            <div style={{ fontSize: '13px', margin: '0 0 12px 0', color: '#1f2937' }}>
+              Hello <strong>{recipientName || recipientEmail.split('@')[0] || 'Customer'}</strong>,
             </div>
 
-            <div style={{ padding: '20px' }}>
-              <p style={{ fontSize: '13px', margin: '0 0 12px 0', color: '#444444' }}>
-                Hello <strong>{recipientName || recipientEmail.split('@')[0] || 'Valued Customer'}</strong>,
-              </p>
-
-              <div style={{ fontSize: '13px', lineHeight: '1.5', color: '#444444', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
-                {messageBody || 'Your message body content will render here...'}
-              </div>
-
-              {selectedShipment && (
-                <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: '6px', padding: '14px', marginBottom: '16px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <div>
-                      <span style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase' }}>Tracking Code</span><br/>
-                      <strong style={{ fontSize: '14px', color: '#351C15' }}>{selectedShipment.id}</strong>
-                    </div>
-                    <div style={{ textAlign: 'right' }}>
-                      <span style={{ fontSize: '10px', color: '#64748b', textTransform: 'uppercase' }}>Status</span><br/>
-                      <span style={{ background: '#351C15', color: '#FFB500', fontWeight: '700', fontSize: '10px', padding: '2px 8px', borderRadius: '12px', textTransform: 'uppercase' }}>
-                        {selectedShipment.status}
-                      </span>
-                    </div>
-                  </div>
-                  <div style={{ borderTop: '1px dashed #cbd5e1', paddingTop: '8px', fontSize: '11px', color: '#475569' }}>
-                    <strong>Route:</strong> {selectedShipment.origin || 'N/A'} &rarr; {selectedShipment.destination || 'N/A'}
-                  </div>
-                </div>
-              )}
-
-              <div style={{ textAlign: 'center', marginTop: '16px' }}>
-                <span style={{ background: '#FFB500', color: '#351C15', fontSize: '13px', fontWeight: '700', padding: '8px 20px', borderRadius: '6px', display: 'inline-block' }}>
-                  Track Live Package &rarr;
-                </span>
-              </div>
+            <div style={{ fontSize: '13px', lineHeight: '1.6', color: '#374151', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
+              {messageBody || 'Your message body content will render here...'}
             </div>
 
-            <div style={{ background: '#f1f5f9', padding: '12px', textAlign: 'center', borderTop: '1px solid #e2e8f0', fontSize: '10px', color: '#64748b' }}>
-              UPS Logistics Services &bull; Sent from UPS Admin Portal
+            {selectedShipment && (
+              <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '14px', marginBottom: '16px', fontSize: '12px' }}>
+                <div style={{ marginBottom: '4px' }}><strong>Tracking ID:</strong> <span style="font-family: monospace;">{selectedShipment.id}</span></div>
+                <div style={{ marginBottom: '4px' }}><strong>Status:</strong> {selectedShipment.status}</div>
+                <div><strong>Route:</strong> {selectedShipment.origin || 'N/A'} to {selectedShipment.destination || 'N/A'}</div>
+              </div>
+            )}
+
+            <div style={{ margin: '20px 0 16px 0' }}>
+              <span style={{ background: '#351C15', color: '#ffffff', fontSize: '12px', fontWeight: '600', padding: '8px 16px', borderRadius: '4px', display: 'inline-block' }}>
+                Track Shipment Online &rarr;
+              </span>
+            </div>
+
+            <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '12px', fontSize: '11px', color: '#6b7280' }}>
+              UPS Global Logistics Support &bull; ups-global-shipping.com
             </div>
 
           </div>
