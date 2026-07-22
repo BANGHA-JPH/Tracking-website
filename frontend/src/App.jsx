@@ -174,6 +174,18 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
   const [sending, setSending] = useState(false);
   const [feedback, setFeedback] = useState({ type: '', text: '' });
 
+  const inputStyle = {
+    width: '100%',
+    padding: '10px 14px',
+    borderRadius: '6px',
+    background: '#1b1613',
+    border: '1px solid var(--border-color, #3a322c)',
+    color: '#ffffff',
+    fontSize: '0.9rem',
+    outline: 'none',
+    boxSizing: 'border-box'
+  };
+
   const handleSelectShipment = (shipmentId) => {
     setSelectedShipmentId(shipmentId);
     if (!shipmentId) return;
@@ -278,7 +290,7 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
           fontWeight: '600',
           fontSize: '0.9rem'
         }}>
-          {feedback.type === 'success' ? '✓ ' : '⚠️ '}{feedback.text}
+          {feedback.type === 'success' ? '✓ ' : 'Warning: '}{feedback.text}
         </div>
       )}
 
@@ -293,17 +305,17 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
           <form onSubmit={handleSendEmail} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             
             <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: '#e2e8f0', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
                 Link Active Shipment (Auto-Fills Customer Info)
               </label>
               <select
                 value={selectedShipmentId}
                 onChange={(e) => handleSelectShipment(e.target.value)}
-                style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                style={inputStyle}
               >
-                <option value="">-- None (Manual Recipient) --</option>
+                <option value="" style={{ background: '#1b1613', color: '#ffffff' }}>-- None (Manual Recipient) --</option>
                 {shipments.map(s => (
-                  <option key={s.id} value={s.id}>
+                  <option key={s.id} value={s.id} style={{ background: '#1b1613', color: '#ffffff' }}>
                     {s.id} - {s.customerName || 'No Name'} ({s.customerEmail || 'No Email'})
                   </option>
                 ))}
@@ -312,7 +324,7 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: '700', color: '#e2e8f0', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
                   Recipient Email *
                 </label>
                 <input
@@ -321,11 +333,11 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
                   value={recipientEmail}
                   onChange={(e) => setRecipientEmail(e.target.value)}
                   required
-                  style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                  style={inputStyle}
                 />
               </div>
               <div>
-                <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+                <label style={{ fontSize: '0.8rem', fontWeight: '700', color: '#e2e8f0', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
                   Customer Name
                 </label>
                 <input
@@ -333,34 +345,34 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
                   placeholder="John Doe"
                   value={recipientName}
                   onChange={(e) => setRecipientName(e.target.value)}
-                  style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                  style={inputStyle}
                 />
               </div>
             </div>
 
             <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: '#e2e8f0', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
                 Preset Email Template
               </label>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                 {[
-                  { id: 'SHIPMENT_UPDATE', label: '📦 Status Update' },
-                  { id: 'OUT_FOR_DELIVERY', label: '🚚 Out for Delivery' },
-                  { id: 'DELAY_NOTICE', label: '⚠️ Delay Notice' },
-                  { id: 'CUSTOM_NOTICE', label: '✉️ Custom Notice' }
+                  { id: 'SHIPMENT_UPDATE', label: 'Status Update' },
+                  { id: 'OUT_FOR_DELIVERY', label: 'Out for Delivery' },
+                  { id: 'DELAY_NOTICE', label: 'Delay Notice' },
+                  { id: 'CUSTOM_NOTICE', label: 'Custom Notice' }
                 ].map(t => (
                   <button
                     key={t.id}
                     type="button"
                     onClick={() => applyTemplate(t.id)}
                     style={{
-                      padding: '8px',
+                      padding: '10px 8px',
                       borderRadius: '6px',
-                      fontSize: '0.8rem',
+                      fontSize: '0.82rem',
                       fontWeight: '600',
                       border: templateType === t.id ? '1px solid #ffb900' : '1px solid var(--border-color)',
-                      background: templateType === t.id ? 'rgba(255, 185, 0, 0.15)' : 'var(--bg-secondary)',
-                      color: templateType === t.id ? '#ffb900' : 'var(--text-primary)',
+                      background: templateType === t.id ? 'rgba(255, 185, 0, 0.15)' : '#1b1613',
+                      color: templateType === t.id ? '#ffb900' : '#ffffff',
                       cursor: 'pointer',
                       textAlign: 'center'
                     }}
@@ -372,7 +384,7 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
             </div>
 
             <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: '#e2e8f0', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
                 Subject Line *
               </label>
               <input
@@ -381,12 +393,12 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 required
-                style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.9rem' }}
+                style={inputStyle}
               />
             </div>
 
             <div>
-              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
+              <label style={{ fontSize: '0.8rem', fontWeight: '700', color: '#e2e8f0', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
                 Message Content *
               </label>
               <textarea
@@ -395,7 +407,7 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
                 value={messageBody}
                 onChange={(e) => setMessageBody(e.target.value)}
                 required
-                style={{ width: '100%', padding: '10px', borderRadius: '6px', background: 'var(--bg-secondary)', border: '1px solid var(--border-color)', color: 'var(--text-primary)', fontSize: '0.9rem', resize: 'vertical' }}
+                style={{ ...inputStyle, resize: 'vertical' }}
               />
             </div>
 
@@ -428,43 +440,50 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
           </form>
         </div>
 
-        {/* Right Column: Live Preview */}
+        {/* Right Column: Live Preview (Dukascopy Bank Style) */}
         <div style={{ background: 'var(--card-bg, #2a2521)', border: '1px solid var(--border-color)', borderRadius: '12px', padding: '24px' }}>
           <h3 style={{ fontSize: '1.1rem', fontWeight: '700', color: '#ffb900', marginTop: 0, marginBottom: '16px' }}>
             2. Live Email Preview
           </h3>
 
-          <div style={{ background: '#ffffff', color: '#1f2937', borderRadius: '8px', overflow: 'hidden', border: '1px solid #e5e7eb', boxShadow: '0 4px 12px rgba(0,0,0,0.06)', padding: '24px' }}>
+          <div style={{ background: '#eef2f5', color: '#2d3748', borderRadius: '8px', padding: '20px', fontFamily: 'Arial, Helvetica, sans-serif', border: '1px solid #cbd5e1' }}>
             
-            <div style={{ borderBottom: '2px solid #351C15', paddingBottom: '12px', marginBottom: '16px' }}>
-              <span style={{ fontSize: '20px', fontWeight: '800', color: '#351C15', letterSpacing: '0.5px' }}>UPS</span>
-              <span style={{ fontSize: '14px', fontWeight: '600', color: '#d89600', marginLeft: '6px', textTransform: 'uppercase' }}>Logistics</span>
+            {/* Top Logo */}
+            <div style={{ textAlign: 'center', marginBottom: '18px' }}>
+              <span style={{ fontSize: '24px', fontWeight: '900', color: '#351C15', letterSpacing: '1px' }}>UPS</span>
+              <span style={{ fontSize: '20px', fontWeight: '700', color: '#d89600', marginLeft: '6px', textTransform: 'uppercase' }}>LOGISTICS</span>
             </div>
 
-            <div style={{ fontSize: '13px', margin: '0 0 12px 0', color: '#1f2937' }}>
-              Hello <strong>{recipientName || recipientEmail.split('@')[0] || 'Customer'}</strong>,
-            </div>
+            {/* Main White Card 1 */}
+            <div style={{ background: '#ffffff', borderRadius: '4px', padding: '20px', marginBottom: '14px', border: '1px solid #e2e8f0' }}>
+              <p style={{ fontSize: '14px', fontWeight: '600', color: '#2d3748', margin: '0 0 14px 0' }}>
+                Dear {recipientName || 'Sir/Madam'},
+              </p>
 
-            <div style={{ fontSize: '13px', lineHeight: '1.6', color: '#374151', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
-              {messageBody || 'Your message body content will render here...'}
-            </div>
-
-            {selectedShipment && (
-              <div style={{ background: '#f9fafb', border: '1px solid #e5e7eb', borderRadius: '6px', padding: '14px', marginBottom: '16px', fontSize: '12px' }}>
-                <div style={{ marginBottom: '4px' }}><strong>Tracking ID:</strong> <span style="font-family: monospace;">{selectedShipment.id}</span></div>
-                <div style={{ marginBottom: '4px' }}><strong>Status:</strong> {selectedShipment.status}</div>
-                <div><strong>Route:</strong> {selectedShipment.origin || 'N/A'} to {selectedShipment.destination || 'N/A'}</div>
+              <div style={{ fontSize: '13px', lineHeight: '1.6', color: '#4a5568', whiteSpace: 'pre-wrap', marginBottom: '16px' }}>
+                {messageBody || 'Your message content will render here...'}
               </div>
-            )}
 
-            <div style={{ margin: '20px 0 16px 0' }}>
-              <span style={{ background: '#351C15', color: '#ffffff', fontSize: '12px', fontWeight: '600', padding: '8px 16px', borderRadius: '4px', display: 'inline-block' }}>
-                Track Shipment Online &rarr;
-              </span>
+              {selectedShipment && (
+                <div style={{ background: '#f7fafc', border: '1px solid #edf2f7', borderRadius: '2px', padding: '12px', marginBottom: '16px', fontSize: '12px' }}>
+                  <div style={{ marginBottom: '4px' }}><strong>Tracking ID:</strong> <span style={{ fontFamily: 'monospace', fontWeight: 'bold', color: '#351C15' }}>{selectedShipment.id}</span></div>
+                  <div style={{ marginBottom: '4px' }}><strong>Status:</strong> {selectedShipment.status}</div>
+                  <div><strong>Route:</strong> {selectedShipment.origin || 'N/A'} to {selectedShipment.destination || 'N/A'}</div>
+                </div>
+              )}
+
+              <div style={{ marginTop: '16px' }}>
+                <span style={{ color: '#351C15', fontWeight: 'bold', fontSize: '13px', textDecoration: 'underline' }}>
+                  Track Package Online &rarr;
+                </span>
+              </div>
             </div>
 
-            <div style={{ borderTop: '1px solid #f3f4f6', paddingTop: '12px', fontSize: '11px', color: '#6b7280' }}>
-              UPS Global Logistics Support &bull; ups-global-shipping.com
+            {/* Footer White Card 2 */}
+            <div style={{ background: '#ffffff', borderRadius: '4px', padding: '16px', border: '1px solid #e2e8f0', fontSize: '12px', color: '#4a5568' }}>
+              <p style={{ margin: '0 0 4px 0', fontWeight: 'bold', color: '#2d3748' }}>UPS Global Logistics Services</p>
+              <p style={{ margin: '0 0 4px 0' }}>Website: ups-global-shipping.com</p>
+              <p style={{ margin: '0', color: '#718096' }}>Email: support@ups-global-shipping.com</p>
             </div>
 
           </div>
