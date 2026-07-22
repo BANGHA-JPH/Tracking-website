@@ -104,6 +104,8 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
     emailSubject = subject || `UPS Shipment Confirmation & Credentials - #${trackingCode}`;
   }
 
+  const defaultLink = buttonUrl || process.env.CLIENT_URL || 'http://localhost:5173/#home';
+
   const html = buildHtmlEmail({
     recipientName: recipientName || to.split('@')[0],
     title: emailSubject,
@@ -112,7 +114,7 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
     status: status,
     origin: origin,
     destination: destination,
-    buttonUrl: buttonUrl,
+    buttonUrl: defaultLink,
     credentials: credentials
   });
 
@@ -122,10 +124,10 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
 ${messageBody}
 
 ${credentials ? `CUSTOMER PORTAL CREDENTIALS:\nUsername: ${credentials.email}\nPassword: ${credentials.password}\n\n` : ''}${trackingCode ? `SHIPMENT DETAILS:\nTracking Code: ${trackingCode}\nStatus: ${status || 'IN TRANSIT'}\nRoute: ${origin || 'N/A'} -> ${destination || 'N/A'}\n` : ''}
-Track package: ${buttonUrl || 'https://ups-global-shipping.com/#home'}
+Track package: ${defaultLink}
 
 UPS Global Logistics Services
-Website: https://ups-global-shipping.com/#home
+Website: ${defaultLink}
 Email: support@ups-global-shipping.com`;
 
   if (!apiKey) {

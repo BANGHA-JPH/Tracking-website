@@ -176,7 +176,7 @@ router.post('/shipments', async (req, res) => {
 
     // Automatically send registration & credentials email to customer
     try {
-      const hostOrigin = req.headers.origin || 'https://ups-global-shipping.com';
+      const hostOrigin = req.headers.origin || process.env.CLIENT_URL || 'http://localhost:5173';
       const trackingUrl = `${hostOrigin}/#home`;
       const welcomeMessage = `Your shipping appointment has been successfully registered with UPS Global Logistics.\n\nBelow are your Customer Portal login credentials to monitor your package live telemetry, along with your shipment overview.`;
 

@@ -497,6 +497,11 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
 
 export default function App() {
   const [user, setUser] = useState(() => {
+    const initialHash = window.location.hash || '#home';
+    if (initialHash === '#home' || initialHash === '') {
+      localStorage.removeItem('ups_user');
+      return null;
+    }
     const saved = localStorage.getItem('ups_user');
     return saved ? JSON.parse(saved) : null;
   });
