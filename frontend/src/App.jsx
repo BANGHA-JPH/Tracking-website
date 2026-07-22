@@ -232,8 +232,6 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
     setFeedback({ type: '', text: '' });
 
     try {
-      const trackUrl = `${window.location.origin}/#login`;
-
       const res = await fetch(`${API_BASE}/admin/send-email`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -243,8 +241,7 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
           subject: subject,
           messageBody: messageBody,
           templateType: templateType,
-          shipmentId: selectedShipmentId,
-          buttonUrl: trackUrl
+          shipmentId: selectedShipmentId
         })
       });
 

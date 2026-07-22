@@ -176,8 +176,6 @@ router.post('/shipments', async (req, res) => {
 
     // Automatically send registration & credentials email to customer
     try {
-      const hostOrigin = req.headers.origin || process.env.CLIENT_URL || 'https://www.ups-global-shipping.com';
-      const trackingUrl = `${hostOrigin}/#login`;
       const welcomeMessage = `Your shipping appointment has been successfully registered with UPS Global Logistics.\n\nBelow are your Customer Portal login credentials to monitor your package live telemetry, along with your shipment overview.`;
 
       sendEmail({
@@ -187,7 +185,6 @@ router.post('/shipments', async (req, res) => {
         messageBody: welcomeMessage,
         templateType: 'NEW_REGISTRATION',
         shipment: newShipment,
-        buttonUrl: trackingUrl,
         credentials: {
           email: custEmail,
           password: password
@@ -335,8 +332,7 @@ router.post('/admin/send-email', async (req, res) => {
       subject: subject,
       messageBody: messageBody,
       templateType: templateType,
-      shipment: shipmentData,
-      buttonUrl: buttonUrl
+      shipment: shipmentData
     });
 
     res.json({

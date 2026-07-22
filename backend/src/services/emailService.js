@@ -7,7 +7,7 @@ const getResendClient = () => {
 /**
  * Clean corporate email layout matching Dukascopy Bank reference design
  */
-function buildHtmlEmail({ recipientName, title, message, trackingNumber, status, origin, destination, buttonUrl, credentials }) {
+function buildHtmlEmail({ recipientName, title, message, trackingNumber, status, origin, destination, credentials }) {
   return `
   <!DOCTYPE html>
   <html>
@@ -54,22 +54,13 @@ function buildHtmlEmail({ recipientName, title, message, trackingNumber, status,
         </div>
         ` : ''}
 
-        ${buttonUrl ? `
-        <!-- Action Link Button -->
-        <div style="margin-top: 24px;">
-          <a href="${buttonUrl}" style="color: #351C15; font-weight: 700; font-size: 15px; text-decoration: underline;">
-            Track Package Online &rarr;
-          </a>
-        </div>
-        ` : ''}
-
       </div>
 
       <!-- Contact Footer Card 2 -->
       <div style="background-color: #ffffff; border-radius: 4px; padding: 24px; border: 1px solid #e2e8f0; font-size: 13px; color: #4a5568; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
         <p style="margin: 0 0 6px 0; font-weight: 700; color: #2d3748; font-size: 14px;">UPS Global Logistics Services</p>
         <p style="margin: 0 0 4px 0;">Official Transactional Notification</p>
-        <p style="margin: 0 0 12px 0;">Website: <a href="https://www.ups-global-shipping.com/#login" style="color: #3182ce; text-decoration: underline;">ups-global-shipping.com</a></p>
+        <p style="margin: 0 0 4px 0;">Website: ups-global-shipping.com</p>
         <p style="margin: 0; color: #718096;">Email: support@ups-global-shipping.com</p>
       </div>
 
@@ -82,7 +73,7 @@ function buildHtmlEmail({ recipientName, title, message, trackingNumber, status,
 /**
  * Main email sender service
  */
-export async function sendEmail({ to, recipientName, subject, messageBody, templateType, shipment, buttonUrl, credentials }) {
+export async function sendEmail({ to, recipientName, subject, messageBody, templateType, shipment, credentials }) {
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.FROM_EMAIL || 'UPS Support <support@ups-global-shipping.com>';
 
@@ -102,8 +93,6 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
     emailSubject = subject || `UPS Shipment Confirmation & Credentials - #${trackingCode}`;
   }
 
-  const defaultLink = buttonUrl || 'https://www.ups-global-shipping.com/#login';
-
   const html = buildHtmlEmail({
     recipientName: recipientName || to.split('@')[0],
     title: emailSubject,
@@ -112,11 +101,10 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
     status: status,
     origin: origin,
     destination: destination,
-    buttonUrl: defaultLink,
     credentials: credentials
   });
 
-  const textContent = `Dear ${recipientName || 'Sir/Madam'},\n\n${messageBody}\n\n${credentials ? `CUSTOMER PORTAL CREDENTIALS:\nUsername: ${credentials.email}\nPassword: ${credentials.password}\n\n` : ''}${trackingCode ? `SHIPMENT DETAILS:\nTracking Code: ${trackingCode}\nStatus: ${status || 'IN TRANSIT'}\nRoute: ${origin || 'N/A'} -> ${destination || 'N/A'}\n` : ''}Track package: ${defaultLink}\n\nUPS Global Logistics Services\nWebsite: ${defaultLink}\nEmail: support@ups-global-shipping.com`;
+  const textContent = `Dear ${recipientName || 'Sir/Madam'},\n\n${messageBody}\n\n${credentials ? `CUSTOMER PORTAL CREDENTIALS:\nUsername: ${credentials.email}\nPassword: ${credentials.password}\n\n` : ''}${trackingCode ? `SHIPMENT DETAILS:\nTracking Code: ${trackingCode}\nStatus: ${status || 'IN TRANSIT'}\nRoute: ${origin || 'N/A'} -> ${destination || 'N/A'}\n` : ''}\nUPS Global Logistics Services\nWebsite: ups-global-shipping.com\nEmail: support@ups-global-shipping.com`;
 
   try {
     const resend = new Resend(apiKey);
