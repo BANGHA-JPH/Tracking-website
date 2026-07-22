@@ -492,16 +492,34 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
 };
 
 
-export default function App() {
-  const [user, setUser] = useState(() => {
-    const initialHash = window.location.hash || '#home';
-    if (initialHash === '#home' || initialHash === '') {
+const getValidSession = () => {
+  try {
+    const savedStr = localStorage.getItem('ups_user');
+    if (!savedStr) return null;
+    const saved = JSON.parse(savedStr);
+
+    // Rule: Admin must log in EVERY time (never persist Admin sessions in localStorage across browser visits)
+    if (saved.role === 'admin') {
       localStorage.removeItem('ups_user');
       return null;
     }
-    const saved = localStorage.getItem('ups_user');
-    return saved ? JSON.parse(saved) : null;
-  });
+
+    // Rule: Client (Customer) session saved for 24 hours (24 * 60 * 60 * 1000 ms)
+    const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+    if (saved.loginTimestamp && (Date.now() - saved.loginTimestamp > TWENTY_FOUR_HOURS_MS)) {
+      localStorage.removeItem('ups_user');
+      return null;
+    }
+
+    return saved;
+  } catch (e) {
+    localStorage.removeItem('ups_user');
+    return null;
+  }
+};
+
+export default function App() {
+  const [user, setUser] = useState(() => getValidSession());
 
   const [activeTab, setActiveTab] = useState('home');
   const [shipments, setShipments] = useState([]);
@@ -596,8 +614,7 @@ export default function App() {
       const rawHash = window.location.hash || '#home';
       window.scrollTo(0, 0);
 
-      const savedUserStr = localStorage.getItem('ups_user');
-      const currentUser = user || (savedUserStr ? JSON.parse(savedUserStr) : null);
+      const currentUser = user || getValidSession();
 
       const targetTab = rawHash.startsWith('#details?id=') ? 'details' : rawHash.replace('#', '');
       
@@ -758,8 +775,17 @@ export default function App() {
       if (!res.ok) {
         setLoginError(data.error || 'Login authorization fail.');
       } else {
-        localStorage.setItem('ups_user', JSON.stringify(data));
-        setUser(data);
+        if (data.role === 'admin') {
+          localStorage.removeItem('ups_user');
+          setUser(data);
+        } else {
+          const clientSession = {
+            ...data,
+            loginTimestamp: Date.now()
+          };
+          localStorage.setItem('ups_user', JSON.stringify(clientSession));
+          setUser(clientSession);
+        }
         const targetTab = data.role === 'admin' ? 'admin' : 'dashboard';
         setActiveTab(targetTab);
         window.location.hash = `#${targetTab}`;
@@ -795,8 +821,17 @@ export default function App() {
       });
       const data = await res.json();
       if (res.ok) {
-        localStorage.setItem('ups_user', JSON.stringify(data));
-        setUser(data);
+        if (data.role === 'admin') {
+          localStorage.removeItem('ups_user');
+          setUser(data);
+        } else {
+          const clientSession = {
+            ...data,
+            loginTimestamp: Date.now()
+          };
+          localStorage.setItem('ups_user', JSON.stringify(clientSession));
+          setUser(clientSession);
+        }
         window.location.hash = role === 'admin' ? '#admin' : '#dashboard';
       }
     } catch (e) {

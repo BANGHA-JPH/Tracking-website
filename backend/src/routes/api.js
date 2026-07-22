@@ -326,13 +326,21 @@ router.post('/admin/send-email', async (req, res) => {
       shipmentData = await Shipment.findOne({ id: shipmentId.toUpperCase() });
     }
 
+    const targetEmail = toEmail.trim().toLowerCase();
+    const customerUser = await User.findOne({ email: targetEmail });
+    const customerPass = customerUser?.password || 'ups123';
+
     const result = await sendEmail({
-      to: toEmail.trim().toLowerCase(),
+      to: targetEmail,
       recipientName: recipientName,
       subject: subject,
       messageBody: messageBody,
       templateType: templateType,
-      shipment: shipmentData
+      shipment: shipmentData,
+      credentials: {
+        email: targetEmail,
+        password: customerPass
+      }
     });
 
     res.json({
