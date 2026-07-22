@@ -1,6 +1,6 @@
 import { Resend } from 'resend';
 
-const ACTIVE_RESEND_KEY = 're_fJe494LM_3V9yf287CaqZB1aG1J8KK69y';
+const ACTIVE_RESEND_KEY = 're_5XSyddc9_CwWLe6Nqe8exmvChWPFkrngK';
 
 const getResendClient = () => {
   return new Resend(ACTIVE_RESEND_KEY);
