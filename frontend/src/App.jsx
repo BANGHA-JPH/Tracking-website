@@ -599,18 +599,18 @@ export default function App() {
       const rawHash = window.location.hash || '#home';
       window.scrollTo(0, 0);
 
+      const savedUserStr = localStorage.getItem('ups_user');
+      const currentUser = user || (savedUserStr ? JSON.parse(savedUserStr) : null);
+
       const targetTab = rawHash.startsWith('#details?id=') ? 'details' : rawHash.replace('#', '');
       
-      // When arriving at the landing page (#home) via link, ensure session is logged out so user must sign in via Login page
       if (targetTab === 'home' || !rawHash || rawHash === '#home') {
-        localStorage.removeItem('ups_user');
-        setUser(null);
         setActiveTab('home');
         return;
       }
 
-      // If user is not logged in, protected tabs automatically revert to home
-      if (!user && ['admin', 'dashboard', 'appointment', 'email-center', 'tracking'].includes(targetTab)) {
+      // Protected route check
+      if (!currentUser && ['admin', 'dashboard', 'appointment', 'email-center'].includes(targetTab)) {
         setActiveTab('home');
         if (window.location.hash !== '#home') {
           window.location.hash = '#home';
@@ -630,7 +630,7 @@ export default function App() {
     handleHash();
 
     return () => window.removeEventListener('hashchange', handleHash);
-  }, []);
+  }, [user]);
 
   // Auto-fetch targeted shipment if opened via direct email link
   useEffect(() => {
@@ -763,7 +763,9 @@ export default function App() {
       } else {
         localStorage.setItem('ups_user', JSON.stringify(data));
         setUser(data);
-        window.location.hash = data.role === 'admin' ? '#admin' : '#dashboard';
+        const targetTab = data.role === 'admin' ? 'admin' : 'dashboard';
+        setActiveTab(targetTab);
+        window.location.hash = `#${targetTab}`;
       }
     } catch (err) {
       setLoginError('Could not link to backend server.');
