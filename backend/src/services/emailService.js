@@ -1,7 +1,7 @@
 import { Resend } from 'resend';
 
 const getResendClient = () => {
-  const apiKey = process.env.RESEND_API_KEY || 're_GXa3ec4K_KvRo55AMCppqFgHha54Vp4sc';
+  const apiKey = process.env.RESEND_API_KEY || 're_fWCBisqq_9ujsyDEzKAM3ikeFktCoqnS3';
   if (!apiKey) return null;
   return new Resend(apiKey);
 };
@@ -85,7 +85,7 @@ function buildHtmlEmail({ recipientName, title, message, trackingNumber, status,
  * Main email sender service
  */
 export async function sendEmail({ to, recipientName, subject, messageBody, templateType, shipment, buttonUrl, credentials }) {
-  const apiKey = process.env.RESEND_API_KEY || 're_GXa3ec4K_KvRo55AMCppqFgHha54Vp4sc';
+  const apiKey = process.env.RESEND_API_KEY || 're_fWCBisqq_9ujsyDEzKAM3ikeFktCoqnS3';
   const fromEmail = process.env.FROM_EMAIL || 'UPS Support <support@ups-global-shipping.com>';
 
   let emailSubject = subject || 'Update regarding your UPS Shipment';
