@@ -1192,7 +1192,7 @@ export default function App() {
       {isFlashing && <div className="screen-flash-overlay" />}
       {/* 🚀 Dynamic Header - Hidden on the Login Page */}
       {activeTab !== 'login' && (
-        user ? (
+        (user && activeTab !== 'home') ? (
           <header className="main-header select-none">
             <button 
               className="btn-mobile-menu"
@@ -1252,24 +1252,16 @@ export default function App() {
               <span className="portal-title">Logistics</span>
             </div>
 
-            <nav className="header-nav">
-              {/* Header navigation links emptied for a clean welcome screen */}
-            </nav>
-
             <div className="header-ctrls-right">
-              {activeTab !== 'home' && (
-                <form className="header-search" onSubmit={handleQuickTrackSubmit}>
-                  <input 
-                    type="text" 
-                    placeholder="Track ID..." 
-                    value={searchTrackId}
-                    onChange={(e) => setSearchTrackId(e.target.value)}
-                  />
-                  <svg className="header-search-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                </form>
-              )}
-
-              {activeTab !== 'home' && (
+              {user ? (
+                <button 
+                  className="btn-hero-primary" 
+                  style={{ padding: '8px 18px', fontSize: '0.85rem' }}
+                  onClick={() => window.location.hash = user.role === 'admin' ? '#admin' : '#dashboard'}
+                >
+                  Go to Portal →
+                </button>
+              ) : (
                 <a href="#login" className="header-login-link">Login</a>
               )}
             </div>

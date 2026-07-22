@@ -360,6 +360,9 @@ body {
 /* 🚀 LANDING VIEW OVERHAUL */
 .landing-view {
   position: relative;
+  width: 100%;
+  overflow-x: hidden;
+  box-sizing: border-box;
   background-image: linear-gradient(
     to right, 
     rgba(18, 14, 10, 0.88) 0%, 
@@ -372,15 +375,18 @@ body {
   color: #ffffff;
 }
 
-/* Hero layout */
+/* Hero layout - fits screen height and width perfectly */
 .hero-row {
-  max-width: 1200px;
+  max-width: 1280px;
+  width: 100%;
   margin: 0 auto;
-  padding: 80px 40px;
+  padding: 60px 30px;
+  min-height: calc(100vh - 72px);
   display: grid;
   grid-template-columns: 1.1fr 0.9fr;
-  gap: 50px;
+  gap: 40px;
   align-items: center;
+  box-sizing: border-box;
 }
 
 /* Pill badge sticker */
