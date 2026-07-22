@@ -10,6 +10,6 @@ services:
     startCommand: cd backend && node src/server.js
     envVars:
       - key: RESEND_API_KEY
-        value: re_fyNEAQBG_KDRu4PwZKzocs6Z1YL9K6QSY
+        value: re_GXa3ec4K_KvRo55AMCppqFgHha54Vp4sc
       - key: MONGODB_URI
         value: mongodb+srv://mbahemile35_db_user:pFu4mN7A4zTNLdqm@cluster1.4mor1fj.mongodb.net/ups_portal?retryWrites=true&w=majority&appName=Cluster1
