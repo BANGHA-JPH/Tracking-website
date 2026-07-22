@@ -1531,14 +1531,14 @@ export default function App() {
                       <img className="reviewer-avatar" src="/review-1.jpg" alt="Marcus Vance" />
                       <div className="reviewer-meta">
                         <h4 className="reviewer-name">Marcus Vance</h4>
-                        <span className="reviewer-role">Verified Enterprise Shipper &bull; Chicago, IL</span>
+                        <span className="reviewer-role">Verified Shipper &bull; Chicago, IL</span>
                       </div>
                     </div>
                     <div className="review-stars-row">
                       ★★★★★ <span className="review-rating-score">5.0 / 5.0</span>
                     </div>
                     <p className="review-comment-text">
-                      "UPS Global Logistics has completely transformed our supply chain. The real-time telemetry tracking and instant email dispatch alerts keep our business operating smoothly with zero delivery surprises."
+                      "Honestly impressed. Had to ship three crates of auto parts across states last week and was super nervous about delays. Got the email with my login details right after registering, logged in, and watched the truck move on the live map the whole way. Package arrived a day early. Def using them again."
                     </p>
                     <div className="review-date-badge">Verified Customer Review &bull; July 2026</div>
                   </div>
@@ -1548,15 +1548,15 @@ export default function App() {
                     <div className="review-card-header">
                       <img className="reviewer-avatar" src="/review-2.jpg" alt="David Miller" />
                       <div className="reviewer-meta">
-                        <h4 className="reviewer-name">David Miller</h4>
-                        <span className="reviewer-role">Freight Customer &bull; Denver, CO</span>
+                        <h4 className="reviewer-name">Dave Miller</h4>
+                        <span className="reviewer-role">Verified Recipient &bull; Denver, CO</span>
                       </div>
                     </div>
                     <div className="review-stars-row">
                       ★★★★★ <span className="review-rating-score">5.0 / 5.0</span>
                     </div>
                     <p className="review-comment-text">
-                      "Super fast delivery and crystal clear tracking! I received my tracking link and credentials via email instantly when the appointment was created. Couldn't ask for a smoother logistics service."
+                      "My package was coming in from Denver and I kept checking the live tracking link on my phone every couple hours haha. The email update came in as soon as it hit the local warehouse. Driver was super friendly too. 5 stars all day."
                     </p>
                     <div className="review-date-badge">Verified Customer Review &bull; July 2026</div>
                   </div>
@@ -1567,14 +1567,14 @@ export default function App() {
                       <img className="reviewer-avatar" src="/review-3.jpg" alt="Chloe Sterling" />
                       <div className="reviewer-meta">
                         <h4 className="reviewer-name">Chloe Sterling</h4>
-                        <span className="reviewer-role">E-commerce Operations Lead &bull; Seattle, WA</span>
+                        <span className="reviewer-role">Online Store Manager &bull; Seattle, WA</span>
                       </div>
                     </div>
                     <div className="review-stars-row">
                       ★★★★★ <span className="review-rating-score">5.0 / 5.0</span>
                     </div>
                     <p className="review-comment-text">
-                      "The live map tracking and automated email alerts are absolute game changers for our support team. 10/10 service, excellent customer care, and zero shipment delays!"
+                      "We switch shipping companies all the time for our online store, but UPS has been by far the most reliable. No missing tracking numbers, no weird email bugs. Our customers get their login links immediately and stop emailing support asking 'where is my package'. Worth every penny."
                     </p>
                     <div className="review-date-badge">Verified Customer Review &bull; July 2026</div>
                   </div>
