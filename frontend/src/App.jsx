@@ -619,17 +619,33 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHash);
   }, [user]);
 
+  // Auto-fetch targeted shipment if opened via direct email link
+  useEffect(() => {
+    if (!selectedShipmentId) return;
+    const exists = shipments.some(s => s.id.toUpperCase() === selectedShipmentId.toUpperCase());
+    if (!exists) {
+      fetch(`${API_BASE}/shipments/${selectedShipmentId}`)
+        .then(res => res.ok ? res.json() : null)
+        .then(data => {
+          if (data && data.id) {
+            setShipments(prev => {
+              if (prev.some(s => s.id.toUpperCase() === data.id.toUpperCase())) return prev;
+              return [data, ...prev];
+            });
+          }
+        })
+        .catch(err => console.error('Error fetching direct link shipment:', err));
+    }
+  }, [selectedShipmentId]);
+
   // Fetch initial core shipments / data
   const fetchShipments = async () => {
-    if (!user) return;
     try {
-      const emailQuery = user.role === 'admin' ? '' : `?email=${user.email}`;
+      const emailQuery = user ? (user.role === 'admin' ? '' : `?email=${user.email}`) : '';
       const res = await fetch(`${API_BASE}/shipments${emailQuery}`);
       const data = await res.json();
       if (Array.isArray(data)) {
         setShipments(data);
-      } else {
-        setShipments([]);
       }
       
       // Auto-set simulator target if empty
@@ -638,9 +654,12 @@ export default function App() {
       }
     } catch (e) {
       console.error('Fetch shipments failed:', e);
-      setShipments([]);
     }
   };
+
+  useEffect(() => {
+    fetchShipments();
+  }, [user]);
 
   const fetchStats = async () => {
     if (!user || user.role !== 'admin') return;
@@ -1159,8 +1178,8 @@ export default function App() {
   const displayedShipments = user && user.role === 'customer' ? customerShipments : shipments;
 
   const activeShipment = user && user.role === 'customer'
-    ? customerShipments.find(s => s.id === selectedShipmentId)
-    : shipments.find(s => s.id === selectedShipmentId);
+    ? customerShipments.find(s => s.id.toUpperCase() === (selectedShipmentId || '').toUpperCase())
+    : shipments.find(s => s.id.toUpperCase() === (selectedShipmentId || '').toUpperCase());
 
   // Compute metric panels for customer
   const myTotalShipments = customerShipments.length;
@@ -2123,7 +2142,44 @@ export default function App() {
           )}
 
           {/* SHIPMENT DETAILS / DYNAMIC MAP VIEW */}
-          {activeTab === 'details' && activeShipment && (() => {
+          {activeTab === 'details' && (() => {
+            if (!activeShipment) {
+              return (
+                <section className="shipment-details-view" style={{ padding: '60px 20px', textAlign: 'center' }}>
+                  <div className="back-nav-row" style={{ marginBottom: '30px' }}>
+                    <button onClick={() => window.location.hash = '#home'} className="btn-back-link">
+                      ← BACK TO LANDING PAGE
+                    </button>
+                  </div>
+                  <div style={{ background: 'var(--card-bg, #2a2521)', border: '1px solid var(--border-color, #3a322c)', borderRadius: '12px', padding: '40px', maxWidth: '600px', margin: '0 auto', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' }}>
+                    <Package style={{ width: '48px', height: '48px', color: '#ffb900', marginBottom: '16px' }} />
+                    <h2 style={{ fontSize: '1.5rem', fontWeight: '800', marginBottom: '10px', color: '#fff' }}>
+                      Loading Telemetry for Shipment #{selectedShipmentId || 'Unknown'}...
+                    </h2>
+                    <p style={{ color: '#cbd5e1', fontSize: '0.95rem', marginBottom: '24px' }}>
+                      Connecting to UPS Global Tracking database to load parcel telemetry.
+                    </p>
+                    <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+                      <button 
+                        className="btn-hero-primary"
+                        style={{ padding: '10px 20px', fontSize: '0.85rem' }}
+                        onClick={() => window.location.reload()}
+                      >
+                        Refresh Tracking Page
+                      </button>
+                      <button 
+                        className="btn-hero-secondary"
+                        style={{ padding: '10px 20px', fontSize: '0.85rem' }}
+                        onClick={() => window.location.hash = '#home'}
+                      >
+                        Go to Home
+                      </button>
+                    </div>
+                  </div>
+                </section>
+              );
+            }
+
             const etaDetails = (() => {
               const eta = activeShipment.eta || '';
               if (!eta) return { date: 'Pending', time: 'Scheduled' };
@@ -2161,7 +2217,7 @@ export default function App() {
             const serviceLevel = activeShipment.vessel === 'Plane' ? 'Priority Global' : activeShipment.vessel === 'Ship' ? 'Standard Economy' : 'Next-Day Ground';
 
             // Next update countdown dynamically relative to progress
-            const progress = activeShipment.simulation.currentProgress || 0;
+            const progress = activeShipment.simulation ? (activeShipment.simulation.currentProgress || 0) : 0;
             const nextUpdateMins = Math.max(5, Math.round(60 - (progress % 30)));
             const displayProgress = Math.round(progress);
 
@@ -2178,22 +2234,61 @@ export default function App() {
 
             return (
               <section className="shipment-details-view">
+                {/* GUEST ACCESS LOGIN BANNER */}
+                {!user && (
+                  <div style={{
+                    background: 'linear-gradient(to right, rgba(255, 185, 0, 0.15), rgba(53, 28, 21, 0.6))',
+                    border: '1px solid #ffb900',
+                    borderRadius: '8px',
+                    padding: '16px 24px',
+                    marginBottom: '20px',
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    flexWrap: 'wrap',
+                    gap: '15px'
+                  }}>
+                    <div>
+                      <h4 style={{ margin: '0 0 4px 0', color: '#ffb900', fontSize: '1rem', fontWeight: '700' }}>
+                        Live Email Tracking Telemetry
+                      </h4>
+                      <p style={{ margin: 0, color: '#e2e8f0', fontSize: '0.85rem' }}>
+                        Viewing shipment #{activeShipment.id}. Log in to your Customer Portal using the credentials sent to your email to access full account management.
+                      </p>
+                    </div>
+                    <button 
+                      className="btn-hero-primary" 
+                      style={{ padding: '8px 18px', fontSize: '0.85rem' }}
+                      onClick={() => {
+                        setLoginEmail(activeShipment.customerEmail || '');
+                        window.location.hash = '#login';
+                      }}
+                    >
+                      Login to Account →
+                    </button>
+                  </div>
+                )}
+
                 {/* BACK NAVIGATION */}
                 <div className="back-nav-row">
                   <button 
                     onClick={() => {
-                      window.location.hash = user && user.role === 'admin' ? '#admin' : '#dashboard';
+                      if (!user) {
+                        window.location.hash = '#home';
+                      } else {
+                        window.location.hash = user.role === 'admin' ? '#admin' : '#dashboard';
+                      }
                     }} 
                     className="btn-back-link"
                   >
-                    {user && user.role === 'admin' ? '← BACK TO SHIPMENTS' : '← BACK TO DASHBOARD'}
+                    {!user ? '← BACK TO LANDING PAGE' : user.role === 'admin' ? '← BACK TO SHIPMENTS' : '← BACK TO DASHBOARD'}
                   </button>
                 </div>
 
                 {/* DETAILS HEADER */}
                 <div className="details-header-flex">
                   <h2>Shipment Details #{activeShipment.id}</h2>
-                  {user.role === 'admin' && (
+                  {user?.role === 'admin' && (
                     <button className="btn-print-label" onClick={() => window.print()}>
                       <Printer style={{ width: '16px', height: '16px', marginRight: '6px' }} />
                       Print Label
@@ -2382,14 +2477,14 @@ export default function App() {
                             <div className="log-point"></div>
                             <div className="log-text-block">
                               <span className="log-time">LIVE UPDATES</span>
-                              <p className="log-message">{activeShipment.simulation.logs}</p>
+                              <p className="log-message">{activeShipment.simulation?.logs || 'Tracking telemetry initialized.'}</p>
                             </div>
                           </div>
                           <div className="log-entry">
                             <div className="log-point grey"></div>
                             <div className="log-text-block">
                               <span className="log-time">SYSTEM HISTORY</span>
-                              <p className="log-message">Global route coordinates interpolated successfully. Hub sequence: {activeShipment.simulation.waypoints.join(' → ')}.</p>
+                              <p className="log-message">Global route coordinates interpolated successfully. Hub sequence: {activeShipment.simulation?.waypoints ? activeShipment.simulation.waypoints.join(' → ') : 'CHI → DEN → SEA'}.</p>
                             </div>
                           </div>
                         </div>
