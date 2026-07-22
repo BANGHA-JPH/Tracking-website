@@ -4778,6 +4778,106 @@ body {
   box-shadow: 0 4px 12px rgba(255, 185, 0, 0.25);
 }
 
+/* 🌟 CUSTOMER REVIEWS & RATINGS SECTION */
+.landing-reviews-section {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 80px 40px;
+}
+
+.reviews-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 30px;
+}
+
+.review-card {
+  background: var(--card-bg, #2a2521);
+  border: 1px solid var(--border-color, #3a322c);
+  border-radius: 12px;
+  padding: 28px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.review-card:hover {
+  transform: translateY(-4px);
+  border-color: #ffb900;
+  box-shadow: 0 10px 30px rgba(255, 185, 0, 0.15);
+}
+
+.review-card-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.reviewer-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #ffb900;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.reviewer-name {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #ffffff;
+  margin: 0 0 4px 0;
+}
+
+.reviewer-role {
+  font-size: 0.8rem;
+  color: #ffb900;
+  font-weight: 600;
+  display: block;
+}
+
+.review-stars-row {
+  color: #ffb900;
+  font-size: 1.1rem;
+  letter-spacing: 2px;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.review-rating-score {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  background: rgba(255, 185, 0, 0.15);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 185, 0, 0.3);
+}
+
+.review-comment-text {
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #cbd5e1;
+  font-style: italic;
+  margin: 0 0 20px 0;
+  flex: 1;
+}
+
+.review-date-badge {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-top: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
 
 
 

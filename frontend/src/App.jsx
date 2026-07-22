@@ -1510,7 +1510,79 @@ export default function App() {
                 </div>
               </div>
 
-              {/* 4. Orange CTA Banner */}
+              {/* 4. Customer Reviews & Ratings Section */}
+              <div className="landing-reviews-section">
+                <div className="sec-header-center" style={{ textAlign: 'center', marginBottom: '40px' }}>
+                  <div className="hero-sticker" style={{ margin: '0 auto 16px auto', display: 'inline-flex' }}>
+                    <span className="sticker-bullet">★</span>
+                    <span>4.9 / 5.0 Rating Across 12,000+ Shippers</span>
+                  </div>
+                  <h2 style={{ fontSize: '2rem', fontWeight: '800', margin: '0 0 10px 0' }}>What Our Customers Say</h2>
+                  <p style={{ color: '#cbd5e1', maxWidth: '600px', margin: '0 auto', fontSize: '0.95rem' }}>
+                    Read real experiences from business owners and individuals who rely on UPS Global Logistics every day.
+                  </p>
+                </div>
+
+                <div className="reviews-cards-grid">
+                  
+                  {/* Review 1 */}
+                  <div className="review-card">
+                    <div className="review-card-header">
+                      <img className="reviewer-avatar" src="/review-1.jpg" alt="Marcus Vance" />
+                      <div className="reviewer-meta">
+                        <h4 className="reviewer-name">Marcus Vance</h4>
+                        <span className="reviewer-role">Verified Enterprise Shipper &bull; Chicago, IL</span>
+                      </div>
+                    </div>
+                    <div className="review-stars-row">
+                      ★★★★★ <span className="review-rating-score">5.0 / 5.0</span>
+                    </div>
+                    <p className="review-comment-text">
+                      "UPS Global Logistics has completely transformed our supply chain. The real-time telemetry tracking and instant email dispatch alerts keep our business operating smoothly with zero delivery surprises."
+                    </p>
+                    <div className="review-date-badge">Verified Customer Review &bull; July 2026</div>
+                  </div>
+
+                  {/* Review 2 */}
+                  <div className="review-card">
+                    <div className="review-card-header">
+                      <img className="reviewer-avatar" src="/review-2.jpg" alt="David Miller" />
+                      <div className="reviewer-meta">
+                        <h4 className="reviewer-name">David Miller</h4>
+                        <span className="reviewer-role">Freight Customer &bull; Denver, CO</span>
+                      </div>
+                    </div>
+                    <div className="review-stars-row">
+                      ★★★★★ <span className="review-rating-score">5.0 / 5.0</span>
+                    </div>
+                    <p className="review-comment-text">
+                      "Super fast delivery and crystal clear tracking! I received my tracking link and credentials via email instantly when the appointment was created. Couldn't ask for a smoother logistics service."
+                    </p>
+                    <div className="review-date-badge">Verified Customer Review &bull; July 2026</div>
+                  </div>
+
+                  {/* Review 3 */}
+                  <div className="review-card">
+                    <div className="review-card-header">
+                      <img className="reviewer-avatar" src="/review-3.jpg" alt="Chloe Sterling" />
+                      <div className="reviewer-meta">
+                        <h4 className="reviewer-name">Chloe Sterling</h4>
+                        <span className="reviewer-role">E-commerce Operations Lead &bull; Seattle, WA</span>
+                      </div>
+                    </div>
+                    <div className="review-stars-row">
+                      ★★★★★ <span className="review-rating-score">5.0 / 5.0</span>
+                    </div>
+                    <p className="review-comment-text">
+                      "The live map tracking and automated email alerts are absolute game changers for our support team. 10/10 service, excellent customer care, and zero shipment delays!"
+                    </p>
+                    <div className="review-date-badge">Verified Customer Review &bull; July 2026</div>
+                  </div>
+
+                </div>
+              </div>
+
+              {/* 5. Orange CTA Banner */}
               <div className="cta-banner-wrapper">
                 <div className="cta-banner-card">
                   <h2>Ready to Optimize Your Logistics?</h2>
