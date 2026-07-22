@@ -122,10 +122,10 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
 ${messageBody}
 
 ${credentials ? `CUSTOMER PORTAL CREDENTIALS:\nUsername: ${credentials.email}\nPassword: ${credentials.password}\n\n` : ''}${trackingCode ? `SHIPMENT DETAILS:\nTracking Code: ${trackingCode}\nStatus: ${status || 'IN TRANSIT'}\nRoute: ${origin || 'N/A'} -> ${destination || 'N/A'}\n` : ''}
-Track package: ${buttonUrl || 'https://ups-global-shipping.com'}
+Track package: ${buttonUrl || 'https://ups-global-shipping.com/#home'}
 
 UPS Global Logistics Services
-Website: https://ups-global-shipping.com
+Website: https://ups-global-shipping.com/#home
 Email: support@ups-global-shipping.com`;
 
   if (!apiKey) {
