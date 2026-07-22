@@ -1370,7 +1370,7 @@ export default function App() {
 
                 <div className="hero-visual-col">
                   <div className="hero-main-img-card">
-                    <img className="hero-main-img" src="/assets/warehouse_conveyor.png" alt="Warehouse logistics conveyor" />
+                    <img className="hero-main-img" src="/hero-bg-2.jpg" alt="Warehouse logistics hub" />
                     
                     <div className="image-text-overlay">
                       <div className="overlay-title">GLOBAL LOGISTICS</div>

@@ -357,9 +357,19 @@ body {
   padding: 0;
 }
 
-/* 🚀 LANDING VIEW OVERHAUL (Matches Screenshot) */
+/* 🚀 LANDING VIEW OVERHAUL */
 .landing-view {
-  background-color: #ffffff;
+  position: relative;
+  background-image: linear-gradient(
+    to right, 
+    rgba(18, 14, 10, 0.88) 0%, 
+    rgba(28, 22, 16, 0.82) 50%, 
+    rgba(18, 14, 10, 0.72) 100%
+  ), url('/hero-bg-1.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #ffffff;
 }
 
 /* Hero layout */
@@ -378,12 +388,13 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background-color: #F5EFEB;
+  background-color: rgba(255, 185, 0, 0.15);
+  border: 1px solid rgba(255, 185, 0, 0.4);
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 700;
-  color: #7B5804;
+  color: #ffb900;
   margin-bottom: 25px;
 }
 
@@ -391,32 +402,41 @@ body {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background-color: #DDA22A;
+  background-color: #ffb900;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  font-size: 8px;
+  color: #351C15;
+  font-size: 9px;
+  font-weight: bold;
 }
 
 .hero-text-block h1 {
   font-size: 48px;
   font-weight: 800;
-  color: var(--text-dark);
+  color: #ffffff;
   line-height: 1.15;
   margin-bottom: 20px;
   letter-spacing: -1px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.4);
 }
 
 .hero-text-block h1 span.highlight {
-  color: #8C6202; /* Olive brown brand color */
+  color: #ffb900; /* UPS Gold */
 }
 
 .hero-text-block p {
-  color: var(--text-secondary);
+  color: #cbd5e1;
   font-size: 16px;
   line-height: 1.6;
   margin-bottom: 35px;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+
+.trust-caption {
+  font-size: 12px;
+  font-weight: 600;
+  color: #cbd5e1;
 }
 
 /* Buttons in Hero */
