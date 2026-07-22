@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: Tracking-website
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: ./frontend/dist
+    envVars:
+      - key: RESEND_API_KEY
+        value: re_Lq1FCBzy_6oVWeVz73N7bJqGMhfi39cdU
+      - key: MONGODB_URI
+        value: mongodb+srv://mbahemile35_db_user:pFu4mN7A4zTNLdqm@cluster1.4mor1fj.mongodb.net/ups_portal?retryWrites=true&w=majority&appName=Cluster1
