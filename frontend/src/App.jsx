@@ -3085,9 +3085,25 @@ export default function App() {
               <h3 style={{ margin: 0, fontSize: '1.25rem', color: '#ffb900' }}>Customer Portal Created</h3>
             </div>
             
-            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary, #cccccc)', marginBottom: '20px', lineHeight: '1.4' }}>
+            <p style={{ fontSize: '0.9rem', color: 'var(--text-secondary, #cccccc)', marginBottom: '16px', lineHeight: '1.4' }}>
               A customer portal account has been created. The customer can log in using these credentials to track their shipment and view live simulation telemetry.
             </p>
+
+            <div style={{
+              background: 'rgba(34, 197, 94, 0.15)',
+              border: '1px solid #22c55e',
+              borderRadius: '6px',
+              padding: '10px 14px',
+              color: '#4ade80',
+              fontSize: '0.85rem',
+              fontWeight: '600',
+              marginBottom: '20px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px'
+            }}>
+              <span>✓ Automated confirmation email with credentials & tracking link sent to <strong>{credentialsModal.email}</strong>.</span>
+            </div>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '20px' }}>
               <div>

@@ -7,9 +7,9 @@ const getResendClient = () => {
 };
 
 /**
- * Clean, lightweight transactional HTML Email Template (Anti-Spam Optimized)
+ * Professional, clean transactional HTML Email Template (Anti-Spam & Delivery Optimized)
  */
-function buildHtmlEmail({ recipientName, title, message, trackingNumber, status, origin, destination, buttonUrl }) {
+function buildHtmlEmail({ recipientName, title, message, trackingNumber, status, origin, destination, buttonUrl, credentials }) {
   return `
   <!DOCTYPE html>
   <html>
@@ -18,45 +18,84 @@ function buildHtmlEmail({ recipientName, title, message, trackingNumber, status,
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${title}</title>
   </head>
-  <body style="margin: 0; padding: 20px; background-color: #ffffff; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1f2937; line-height: 1.5;">
-    <div style="max-width: 560px; margin: 0 auto; border: 1px solid #e5e7eb; border-radius: 8px; padding: 28px; background-color: #ffffff;">
+  <body style="margin: 0; padding: 24px 12px; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #1e293b; line-height: 1.6;">
+    <div style="max-width: 580px; margin: 0 auto; border: 1px solid #e2e8f0; border-radius: 10px; padding: 32px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
       
-      <!-- Minimal Header -->
-      <div style="border-bottom: 2px solid #351C15; padding-bottom: 14px; margin-bottom: 20px;">
-        <span style="font-size: 22px; font-weight: 800; color: #351C15; letter-spacing: 0.5px;">UPS</span>
-        <span style="font-size: 15px; font-weight: 600; color: #d89600; margin-left: 6px; text-transform: uppercase;">Logistics</span>
+      <!-- Professional UPS Header Bar -->
+      <div style="border-bottom: 3px solid #FFB500; padding-bottom: 16px; margin-bottom: 24px; display: flex; justify-content: space-between; align-items: center;">
+        <div>
+          <span style="font-size: 24px; font-weight: 900; color: #351C15; letter-spacing: 0.5px;">UPS</span>
+          <span style="font-size: 14px; font-weight: 700; color: #d89600; margin-left: 6px; text-transform: uppercase; letter-spacing: 0.5px;">Global Logistics</span>
+        </div>
       </div>
 
+      <!-- Main Subject Title -->
+      <h2 style="font-size: 18px; font-weight: 700; color: #351C15; margin-top: 0; margin-bottom: 16px;">
+        ${title}
+      </h2>
+
       <!-- Main Message -->
-      <p style="font-size: 15px; color: #1f2937; margin-top: 0;">
-        Hello ${recipientName || 'Customer'},
+      <p style="font-size: 15px; color: #334155; margin-top: 0;">
+        Hello <strong>${recipientName || 'Customer'}</strong>,
       </p>
 
-      <div style="font-size: 15px; color: #374151; line-height: 1.6; margin-bottom: 20px;">
+      <div style="font-size: 15px; color: #334155; line-height: 1.6; margin-bottom: 24px;">
         ${message.replace(/\n/g, '<br/>')}
       </div>
 
+      ${credentials ? `
+      <!-- Account Credentials Card -->
+      <div style="background-color: #fdfbf7; border: 1px solid #fcd34d; border-left: 4px solid #FFB500; border-radius: 6px; padding: 18px; margin-bottom: 24px;">
+        <div style="font-size: 12px; font-weight: 800; color: #351C15; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+          🔑 Customer Portal Login Credentials
+        </div>
+        <div style="font-size: 14px; color: #334155; margin-bottom: 6px;">
+          <strong>Username / Email:</strong> <span style="font-family: monospace; font-weight: 600; color: #0f172a;">${credentials.email}</span>
+        </div>
+        <div style="font-size: 14px; color: #334155;">
+          <strong>Password:</strong> <span style="font-family: monospace; font-weight: 700; background: #fff3c4; padding: 3px 8px; border-radius: 4px; color: #351C15; border: 1px solid #fde047;">${credentials.password}</span>
+        </div>
+      </div>
+      ` : ''}
+
       ${trackingNumber ? `
-      <!-- Simple Details Box -->
-      <div style="background-color: #f9fafb; border: 1px solid #e5e7eb; border-radius: 6px; padding: 16px; margin-bottom: 20px; font-size: 14px;">
-        <div style="margin-bottom: 6px;"><strong>Tracking ID:</strong> <span style="font-family: monospace; font-size: 15px; color: #351C15;">${trackingNumber}</span></div>
-        ${status ? `<div style="margin-bottom: 6px;"><strong>Status:</strong> ${status}</div>` : ''}
-        ${origin || destination ? `<div><strong>Route:</strong> ${origin || 'N/A'} to ${destination || 'N/A'}</div>` : ''}
+      <!-- Shipment Summary Box -->
+      <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 24px; font-size: 14px;">
+        <div style="font-size: 12px; font-weight: 800; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px;">
+          📦 Shipment Overview
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span style="color: #64748b;">Tracking Code:</span>
+          <strong style="font-family: monospace; font-size: 15px; color: #351C15;">${trackingNumber}</strong>
+        </div>
+        ${status ? `
+        <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+          <span style="color: #64748b;">Status:</span>
+          <strong style="color: #351C15;">${status}</strong>
+        </div>
+        ` : ''}
+        ${origin || destination ? `
+        <div style="display: flex; justify-content: space-between;">
+          <span style="color: #64748b;">Transport Route:</span>
+          <strong style="color: #334155;">${origin || 'Origin'} &rarr; ${destination || 'Destination'}</strong>
+        </div>
+        ` : ''}
       </div>
       ` : ''}
 
       ${buttonUrl ? `
-      <!-- Simple Track Link Button -->
-      <div style="margin: 24px 0 20px 0;">
-        <a href="${buttonUrl}" style="background-color: #351C15; color: #ffffff; text-decoration: none; padding: 10px 20px; border-radius: 5px; font-weight: 600; font-size: 14px; display: inline-block;">
-          Track Shipment Online &rarr;
+      <!-- Track Link CTA Button -->
+      <div style="margin: 28px 0 24px 0; text-align: center;">
+        <a href="${buttonUrl}" style="background-color: #351C15; color: #ffffff; text-decoration: none; padding: 13px 28px; border-radius: 6px; font-weight: 700; font-size: 14px; display: inline-block; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+          Track Package Online &rarr;
         </a>
       </div>
       ` : ''}
 
-      <!-- Simple Clean Footer -->
-      <div style="border-top: 1px solid #f3f4f6; margin-top: 28px; padding-top: 16px; font-size: 12px; color: #6b7280; text-align: left;">
-        <p style="margin: 0;">UPS Global Logistics Support &bull; <a href="https://ups-global-shipping.com" style="color: #6b7280; text-decoration: underline;">ups-global-shipping.com</a></p>
+      <!-- Clean Footer -->
+      <div style="border-top: 1px solid #e2e8f0; margin-top: 32px; padding-top: 20px; font-size: 12px; color: #64748b; text-align: center;">
+        <p style="margin: 0 0 4px 0; font-weight: 600;">UPS Global Logistics Network</p>
+        <p style="margin: 0;">This is an official transactional message sent from the UPS Logistics Portal.</p>
       </div>
 
     </div>
@@ -68,7 +107,7 @@ function buildHtmlEmail({ recipientName, title, message, trackingNumber, status,
 /**
  * Main email sender service
  */
-export async function sendEmail({ to, recipientName, subject, messageBody, templateType, shipment, buttonUrl }) {
+export async function sendEmail({ to, recipientName, subject, messageBody, templateType, shipment, buttonUrl, credentials }) {
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.FROM_EMAIL || 'UPS Support <support@ups-global-shipping.com>';
 
@@ -84,6 +123,8 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
     emailSubject = subject || `Shipment Update: UPS Package #${trackingCode}`;
   } else if (templateType === 'DELAY_NOTICE') {
     emailSubject = subject || `Important Notice: Update on UPS Package #${trackingCode}`;
+  } else if (templateType === 'NEW_REGISTRATION') {
+    emailSubject = subject || `UPS Shipment Confirmation & Credentials - #${trackingCode}`;
   }
 
   const html = buildHtmlEmail({
@@ -94,7 +135,8 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
     status: status,
     origin: origin,
     destination: destination,
-    buttonUrl: buttonUrl
+    buttonUrl: buttonUrl,
+    credentials: credentials
   });
 
   // Build clean plain text version (Crucial for spam filter pass)
@@ -102,7 +144,7 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
 
 ${messageBody}
 
-${trackingCode ? `Tracking Code: ${trackingCode}\nStatus: ${status || 'IN TRANSIT'}\nRoute: ${origin || 'N/A'} -> ${destination || 'N/A'}\n` : ''}
+${credentials ? `CUSTOMER PORTAL CREDENTIALS:\nUsername: ${credentials.email}\nPassword: ${credentials.password}\n\n` : ''}${trackingCode ? `SHIPMENT DETAILS:\nTracking Code: ${trackingCode}\nStatus: ${status || 'IN TRANSIT'}\nRoute: ${origin || 'N/A'} -> ${destination || 'N/A'}\n` : ''}
 Track package: ${buttonUrl || 'https://ups-global-shipping.com'}
 
 UPS Global Logistics Support`;

@@ -174,6 +174,31 @@ router.post('/shipments', async (req, res) => {
       trackingId: newShipment.id
     };
 
+    // Automatically send registration & credentials email to customer
+    try {
+      const hostOrigin = req.headers.origin || 'https://ups-global-shipping.com';
+      const trackingUrl = `${hostOrigin}/#details?id=${newShipment.id}`;
+      const welcomeMessage = `Your shipping appointment has been successfully registered with UPS Global Logistics.\n\nBelow are your Customer Portal login credentials to monitor your package live telemetry, along with your shipment overview.`;
+
+      sendEmail({
+        to: custEmail,
+        recipientName: sData.customerName,
+        subject: `UPS Shipment Confirmation & Credentials - #${newShipment.id}`,
+        messageBody: welcomeMessage,
+        templateType: 'NEW_REGISTRATION',
+        shipment: newShipment,
+        buttonUrl: trackingUrl,
+        credentials: {
+          email: custEmail,
+          password: password
+        }
+      }).catch(emailErr => {
+        console.error('[AUTO EMAIL ERROR] Registration email failed to dispatch:', emailErr);
+      });
+    } catch (e) {
+      console.error('Error triggering automated registration email:', e);
+    }
+
     res.status(201).json(responsePayload);
   } catch (error) {
     console.error('Error registering cargo shipment:', error);
