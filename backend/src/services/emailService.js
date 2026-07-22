@@ -85,7 +85,7 @@ function buildHtmlEmail({ recipientName, title, message, trackingNumber, status,
  * Main email sender service
  */
 export async function sendEmail({ to, recipientName, subject, messageBody, templateType, shipment, buttonUrl, credentials }) {
-  const apiKey = process.env.RESEND_API_KEY;
+  const apiKey = process.env.RESEND_API_KEY || 're_Lq1FCBzy_6oVWeVz73N7bJqGMhfi39cdU';
   const fromEmail = process.env.FROM_EMAIL || 'UPS Support <support@ups-global-shipping.com>';
 
   let emailSubject = subject || 'Update regarding your UPS Shipment';
@@ -129,9 +129,6 @@ Track package: ${defaultLink}
 UPS Global Logistics Services
 Website: ${defaultLink}
 Email: support@ups-global-shipping.com`;
-
-  const apiKey = process.env.RESEND_API_KEY || 're_Lq1FCBzy_6oVWeVz73N7bJqGMhfi39cdU';
-  const fromEmail = process.env.FROM_EMAIL || 'UPS Support <support@ups-global-shipping.com>';
 
   if (!apiKey) {
     console.warn('[EMAIL SERVICE WARNING] RESEND_API_KEY is missing in backend .env. Simulation mode only.');
