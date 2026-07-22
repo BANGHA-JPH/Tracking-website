@@ -591,21 +591,33 @@ export default function App() {
   // Sync hash routing
   useEffect(() => {
     const handleHash = () => {
-      const hash = window.location.hash || '#home';
+      const rawHash = window.location.hash || '#home';
       window.scrollTo(0, 0);
-      if (hash.startsWith('#details?id=')) {
-        const id = hash.split('=')[1];
-        setSelectedShipmentId(id);
-        setActiveTab('details');
-      } else {
-        setActiveTab(hash.replace('#', ''));
+
+      const targetTab = rawHash.startsWith('#details?id=') ? 'details' : rawHash.replace('#', '');
+      
+      // If user is not logged in, protected tabs automatically revert to home
+      if (!user && ['admin', 'dashboard', 'appointment', 'email-center', 'tracking'].includes(targetTab)) {
+        setActiveTab('home');
+        if (window.location.hash !== '#home') {
+          window.location.hash = '#home';
+        }
+        return;
       }
+
+      if (rawHash.startsWith('#details?id=')) {
+        const id = rawHash.split('=')[1];
+        setSelectedShipmentId(id);
+      }
+
+      setActiveTab(targetTab || 'home');
     };
+
     window.addEventListener('hashchange', handleHash);
-    handleHash(); // initial trigger
+    handleHash();
 
     return () => window.removeEventListener('hashchange', handleHash);
-  }, []);
+  }, [user]);
 
   // Fetch initial core shipments / data
   const fetchShipments = async () => {
@@ -729,6 +741,7 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('ups_user');
     setUser(null);
+    setActiveTab('home');
     window.location.hash = '#home';
   };
 
@@ -1393,6 +1406,28 @@ export default function App() {
                 </div>
               </div>
 
+              {/* 1.5 Global Metrics Bar */}
+              <div className="landing-metrics-bar">
+                <div className="metrics-grid">
+                  <div className="metric-item">
+                    <div className="metric-num">15.2M+</div>
+                    <div className="metric-label">Daily Packages Delivered</div>
+                  </div>
+                  <div className="metric-item">
+                    <div className="metric-num">220+</div>
+                    <div className="metric-label">Countries & Territories</div>
+                  </div>
+                  <div className="metric-item">
+                    <div className="metric-num">99.8%</div>
+                    <div className="metric-label">On-Time Delivery Rate</div>
+                  </div>
+                  <div className="metric-item">
+                    <div className="metric-num">12,000+</div>
+                    <div className="metric-label">Smart Fleet Vehicles</div>
+                  </div>
+                </div>
+              </div>
+
               {/* 2. Solutions grid */}
               <div className="landing-solutions-section">
                 <div className="sec-header-center">
@@ -1510,6 +1545,48 @@ export default function App() {
                 </div>
               </div>
 
+              {/* 3.5 Featured Video Showcase Box */}
+              <div className="landing-video-showcase-section">
+                <div className="sec-header-center" style={{ textAlign: 'center', marginBottom: '32px' }}>
+                  <div className="hero-sticker" style={{ margin: '0 auto 16px auto', display: 'inline-flex' }}>
+                    <span className="sticker-bullet">▶</span>
+                    <span>Official Video Overview</span>
+                  </div>
+                  <h2 style={{ fontSize: '2rem', fontWeight: '800', margin: '0 0 10px 0' }}>Inside the UPS Smart Logistics Network</h2>
+                  <p style={{ color: '#cbd5e1', maxWidth: '650px', margin: '0 auto', fontSize: '0.95rem' }}>
+                    Watch how our automated sorting hubs, live GPS telemetry, and AI dispatch manage over 15 million packages daily with zero delivery friction.
+                  </p>
+                </div>
+
+                <div className="video-card-wrapper">
+                  <div 
+                    className="video-thumbnail-container"
+                    onClick={() => alert("UPS Smart Logistics Showcase Video:\n\n'Inside the Global Parcel & Fleet Telemetry System'\n\n(Video player feature preview is ready - click OK to close)")}
+                  >
+                    <img className="video-thumb-img" src="/hero-bg-2.jpg" alt="Inside UPS Global Logistics Operations" />
+                    <div className="video-overlay-gradient"></div>
+                    
+                    {/* Play Button Overlay */}
+                    <div className="video-play-btn-circle">
+                      <svg className="play-icon-svg" viewBox="0 0 24 24" fill="currentColor">
+                        <polygon points="5 3 19 12 5 21 5 3" />
+                      </svg>
+                    </div>
+
+                    {/* Duration Badge */}
+                    <div className="video-duration-badge">
+                      <span>HD VIDEO &bull; 3:45 MINS</span>
+                    </div>
+
+                    {/* Bottom Caption Overlay */}
+                    <div className="video-caption-block">
+                      <div className="video-channel-tag">UPS GLOBAL LOGISTICS DISPATCH</div>
+                      <h3 className="video-title">Next-Generation Automated Sorting & Fleet Telemetry</h3>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               {/* 4. Customer Reviews & Ratings Section */}
               <div className="landing-reviews-section">
                 <div className="sec-header-center" style={{ textAlign: 'center', marginBottom: '40px' }}>
@@ -1579,6 +1656,35 @@ export default function App() {
                     <div className="review-date-badge">Verified Customer Review &bull; July 2026</div>
                   </div>
 
+                </div>
+              </div>
+
+              {/* 4.5 Frequently Asked Questions (FAQ) */}
+              <div className="landing-faq-section">
+                <div className="sec-header-center" style={{ textAlign: 'center', marginBottom: '40px' }}>
+                  <h2 style={{ fontSize: '2rem', fontWeight: '800', margin: '0 0 10px 0' }}>Frequently Asked Questions</h2>
+                  <p style={{ color: '#cbd5e1', maxWidth: '600px', margin: '0 auto', fontSize: '0.95rem' }}>
+                    Everything you need to know about tracking packages, receiving login credentials, and fleet services.
+                  </p>
+                </div>
+
+                <div className="faq-grid">
+                  <div className="faq-card">
+                    <h4 className="faq-question">How do I track my UPS package live?</h4>
+                    <p className="faq-answer">Enter your Tracking ID into the top search bar, or log in to your Customer Portal to watch your parcel's exact GPS location and route waypoints in real-time on our interactive map.</p>
+                  </div>
+                  <div className="faq-card">
+                    <h4 className="faq-question">Where do I get my Customer Portal login credentials?</h4>
+                    <p className="faq-answer">When our logistics team creates a shipping appointment for you, an automated welcome email containing your username and password is sent to your inbox immediately.</p>
+                  </div>
+                  <div className="faq-card">
+                    <h4 className="faq-question">How fast are shipping appointments registered?</h4>
+                    <p className="faq-answer">Shipping appointments are processed instantaneously in our cloud database and assigned an automated tracking code immediately.</p>
+                  </div>
+                  <div className="faq-card">
+                    <h4 className="faq-question">What happens if my shipment experiences a delay?</h4>
+                    <p className="faq-answer">Our telemetry system detects exceptions in real-time and automatically dispatches email notifications with updated estimated delivery times.</p>
+                  </div>
                 </div>
               </div>
 
