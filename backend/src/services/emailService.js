@@ -104,7 +104,7 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
     emailSubject = subject || `UPS Shipment Confirmation & Credentials - #${trackingCode}`;
   }
 
-  const defaultLink = buttonUrl || process.env.CLIENT_URL || 'http://localhost:5173/#home';
+  const defaultLink = buttonUrl || (process.env.CLIENT_URL ? `${process.env.CLIENT_URL}/#login` : 'http://localhost:5173/#login');
 
   const html = buildHtmlEmail({
     recipientName: recipientName || to.split('@')[0],
