@@ -1,5 +1,14 @@
+import { Resend } from 'resend';
+
+const ACTIVE_RESEND_KEY = 're_fJe494LM_3V9yf287CaqZB1aG1J8KK69y';
+
+const getResendClient = () => {
+  const envKey = process.env.RESEND_API_KEY;
+  const apiKey = (envKey && envKey.startsWith('re_') && !envKey.includes('re_Lq1FCBzy')) ? envKey : ACTIVE_RESEND_KEY;
+  return new Resend(apiKey);
+};
+
 /**
- * Brevo Email Dispatcher Service
  * Clean corporate email layout matching Dukascopy Bank reference design
  */
 function buildHtmlEmail({ recipientName, title, message, trackingNumber, status, origin, destination, buttonUrl, credentials }) {
@@ -74,14 +83,14 @@ function buildHtmlEmail({ recipientName, title, message, trackingNumber, status,
   `;
 }
 
-const K1 = 'xkeysib-ae2ff31ac4ddbb01ac8c08b91e13b81a8d9b922d5619861d4607414912aef45a';
-const K2 = 'DFCVGALexuN7Gl7L';
-const BREVO_API_KEY = process.env.BREVO_API_KEY || `${K1}-${K2}`;
-
 /**
- * Main email sender service using Brevo API v3
+ * Main email sender service
  */
 export async function sendEmail({ to, recipientName, subject, messageBody, templateType, shipment, buttonUrl, credentials }) {
+  const envKey = process.env.RESEND_API_KEY;
+  const apiKey = (envKey && envKey.startsWith('re_') && !envKey.includes('re_Lq1FCBzy')) ? envKey : ACTIVE_RESEND_KEY;
+  const fromEmail = process.env.FROM_EMAIL || 'UPS Support <support@ups-global-shipping.com>';
+
   let emailSubject = subject || 'Update regarding your UPS Shipment';
   let trackingCode = shipment?.id || '';
   let status = shipment?.status || '';
@@ -115,30 +124,26 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
   const textContent = `Dear ${recipientName || 'Sir/Madam'},\n\n${messageBody}\n\n${credentials ? `CUSTOMER PORTAL CREDENTIALS:\nUsername: ${credentials.email}\nPassword: ${credentials.password}\n\n` : ''}${trackingCode ? `SHIPMENT DETAILS:\nTracking Code: ${trackingCode}\nStatus: ${status || 'IN TRANSIT'}\nRoute: ${origin || 'N/A'} -> ${destination || 'N/A'}\n` : ''}Track package: ${defaultLink}\n\nUPS Global Logistics Services\nWebsite: ${defaultLink}\nEmail: support@ups-global-shipping.com`;
 
   try {
-    const res = await fetch('https://api.brevo.com/v3/smtp/email', {
-      method: 'POST',
+    const resend = new Resend(apiKey);
+    const response = await resend.emails.send({
+      from: fromEmail,
+      to: [to],
+      replyTo: 'support@ups-global-shipping.com',
+      subject: emailSubject,
+      html: html,
+      text: textContent,
       headers: {
-        'api-key': BREVO_API_KEY,
-        'accept': 'application/json',
-        'content-type': 'application/json'
-      },
-      body: JSON.stringify({
-        sender: { name: 'UPS Support', email: process.env.FROM_EMAIL_ADDRESS || 'support@ups-global-shipping.com' },
-        to: [{ email: to, name: recipientName || 'Customer' }],
-        subject: emailSubject,
-        htmlContent: html,
-        textContent: textContent
-      })
+        'X-Entity-Ref-ID': `UPS-MSG-${Date.now()}`
+      }
     });
 
-    const data = await res.json();
-    if (!res.ok) {
-      console.error('[BREVO API ERROR]:', data);
-      throw new Error(data.message || 'Brevo API rejected email delivery.');
+    if (response.error) {
+      console.error('[RESEND API ERROR]:', response.error);
+      throw new Error(response.error.message || 'Resend API rejected email delivery.');
     }
 
-    console.log(`[BREVO EMAIL SENT] Successfully sent email to ${to} (Message ID: ${data.messageId})`);
-    return { success: true, id: data.messageId };
+    console.log(`[RESEND EMAIL SENT] Successfully sent email to ${to} (ID: ${response.data?.id})`);
+    return { success: true, id: response.data?.id };
   } catch (err) {
     console.error('[EMAIL SERVICE EXCEPTION]:', err);
     throw err;
