@@ -1,9 +1,13 @@
 services:
-  - type: web
+  - type: static
     name: Tracking-website
-    env: static
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: ./frontend/dist
+    buildCommand: node build.js
+    staticPublishPath: ./dist
+  - type: web
+    name: Tracking-website-service
+    env: node
+    buildCommand: node build.js
+    startCommand: cd backend && node src/server.js
     envVars:
       - key: RESEND_API_KEY
         value: re_Lq1FCBzy_6oVWeVz73N7bJqGMhfi39cdU

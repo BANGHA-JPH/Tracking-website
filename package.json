@@ -3,8 +3,7 @@
   "version": "1.0.0",
   "description": "UPS Logistics Portal - Shipment Tracking Web Application",
   "scripts": {
-    "postinstall": "cd frontend && npm install",
-    "build": "cd frontend && npm install && npm run build",
+    "build": "node build.js",
     "start": "cd backend && node src/server.js"
   }
 }
