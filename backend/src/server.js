@@ -61,6 +61,15 @@ wss.on('connection', (ws) => {
 async function initializeServer() {
   await connectDatabase();
   
+  server.on('error', (e) => {
+    if (e.code === 'EADDRINUSE') {
+      console.error(`Port ${PORT} is occupied by another process. Freeing port...`);
+      process.exit(1);
+    } else {
+      console.error('Server error:', e);
+    }
+  });
+
   server.listen(PORT, () => {
     console.log(`===============================================`);
     console.log(`UPS Logistics Portal Backend running at port ${PORT}`);
