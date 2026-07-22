@@ -123,7 +123,7 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
         'content-type': 'application/json'
       },
       body: JSON.stringify({
-        sender: { name: 'UPS Support', email: 'support@ups-global-shipping.com' },
+        sender: { name: 'UPS Support', email: process.env.FROM_EMAIL_ADDRESS || 'support@ups-global-shipping.com' },
         to: [{ email: to, name: recipientName || 'Customer' }],
         subject: emailSubject,
         htmlContent: html,
