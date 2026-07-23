@@ -596,6 +596,30 @@ const MessagesView = ({ messages, API_BASE, onMarkRead }) => {
     }
   };
 
+  const handleSimulateInbound = async () => {
+    const targetEmail = selectedEmail || 'customer@ups.com';
+    const sampleText = prompt(`Enter test email reply message from customer (${targetEmail}):`, "Hello Support, thank you! Could you also check if signature release is available for my shipment?");
+    if (!sampleText) return;
+
+    try {
+      const res = await fetch(`${API_BASE}/inbound-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          from: `${activeConv?.name || 'Customer'} <${targetEmail}>`,
+          subject: `Re: Inquiry regarding UPS Package`,
+          text: sampleText
+        })
+      });
+      const data = await res.json();
+      if (data.success) {
+        setFeedback({ type: 'success', text: 'Simulated customer email reply received in inbox!' });
+      }
+    } catch (err) {
+      setFeedback({ type: 'error', text: 'Failed to simulate inbound email.' });
+    }
+  };
+
   const filteredConversations = conversations.filter(c => 
     c.email.toLowerCase().includes(filterSearch.toLowerCase()) || 
     c.name.toLowerCase().includes(filterSearch.toLowerCase())
@@ -610,6 +634,24 @@ const MessagesView = ({ messages, API_BASE, onMarkRead }) => {
             Real-time inbound customer inquiries & threaded email responses
           </p>
         </div>
+        <button
+          onClick={handleSimulateInbound}
+          style={{
+            backgroundColor: '#2b6cb0',
+            color: '#ffffff',
+            fontWeight: '700',
+            fontSize: '13px',
+            padding: '8px 16px',
+            borderRadius: '6px',
+            border: 'none',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px'
+          }}
+        >
+          + Test Inbound Reply
+        </button>
       </div>
 
       <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: '20px', minHeight: '650px' }}>

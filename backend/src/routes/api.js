@@ -388,7 +388,10 @@ router.post('/inbound-email', async (req, res) => {
   }
 
   try {
-    const payload = req.body || {};
+    const rawReqBody = req.body || {};
+    console.log('[INBOUND WEBHOOK RECEIVED]:', JSON.stringify(rawReqBody, null, 2));
+
+    const payload = rawReqBody.data || rawReqBody.payload || rawReqBody;
     
     // Extract Sender Email
     let rawFrom = payload.from || payload.sender || payload.envelope?.from || payload.fromEmail || payload['stripped-prefix'] || '';
