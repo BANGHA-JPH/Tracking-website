@@ -871,6 +871,10 @@ const getValidSession = () => {
 
 export default function App() {
   const [user, setUser] = useState(() => getValidSession());
+  const userRef = useRef(user);
+  useEffect(() => {
+    userRef.current = user;
+  }, [user]);
 
   const [activeTab, setActiveTab] = useState('home');
   const [shipments, setShipments] = useState([]);
@@ -977,7 +981,7 @@ export default function App() {
       const rawHash = window.location.hash || '#home';
       window.scrollTo(0, 0);
 
-      const currentUser = user || getValidSession();
+      const currentUser = userRef.current || user || getValidSession();
 
       const targetTab = rawHash.startsWith('#details?id=') ? 'details' : rawHash.replace('#', '');
       
@@ -1148,6 +1152,7 @@ export default function App() {
         if (data.role === 'admin') {
           localStorage.removeItem('ups_user');
           setUser(data);
+          userRef.current = data;
         } else {
           const clientSession = {
             ...data,
@@ -1155,6 +1160,7 @@ export default function App() {
           };
           localStorage.setItem('ups_user', JSON.stringify(clientSession));
           setUser(clientSession);
+          userRef.current = clientSession;
         }
         const targetTab = data.role === 'admin' ? 'admin' : 'dashboard';
         setActiveTab(targetTab);
@@ -1168,6 +1174,7 @@ export default function App() {
   const handleLogout = () => {
     localStorage.removeItem('ups_user');
     setUser(null);
+    userRef.current = null;
     setActiveTab('home');
     window.location.hash = '#home';
   };
@@ -1176,6 +1183,7 @@ export default function App() {
   const handleRoleBypass = async (role) => {
     localStorage.removeItem('ups_user');
     setUser(null);
+    userRef.current = null;
     
     if (role === 'visitor') {
       window.location.hash = '#home';
@@ -1194,6 +1202,7 @@ export default function App() {
         if (data.role === 'admin') {
           localStorage.removeItem('ups_user');
           setUser(data);
+          userRef.current = data;
         } else {
           const clientSession = {
             ...data,
@@ -1201,6 +1210,7 @@ export default function App() {
           };
           localStorage.setItem('ups_user', JSON.stringify(clientSession));
           setUser(clientSession);
+          userRef.current = clientSession;
         }
         window.location.hash = role === 'admin' ? '#admin' : '#dashboard';
       }
