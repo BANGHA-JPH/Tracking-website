@@ -34,6 +34,18 @@ const shipmentSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
+// 3. Message Schema
+const messageSchema = new mongoose.Schema({
+  customerEmail: { type: String, required: true, lowercase: true, trim: true, index: true },
+  customerName: { type: String, default: 'Customer' },
+  subject: { type: String, default: 'No Subject' },
+  body: { type: String, required: true },
+  sender: { type: String, required: true, enum: ['customer', 'admin'] },
+  read: { type: Boolean, default: false },
+  messageId: { type: String },
+  inReplyTo: { type: String }
+}, { timestamps: true });
+
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -41,6 +53,7 @@ import { fileURLToPath } from 'url';
 // Generate Mongoose models
 const RealCustomer = mongoose.model('Customer', customerSchema);
 const RealShipment = mongoose.model('Shipment', shipmentSchema);
+const RealMessage = mongoose.model('Message', messageSchema);
 
 // --- OFFLINE IN-MEMORY FILE-BACKED DATABASE MOCK ---
 
@@ -48,12 +61,13 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const DB_FILE = path.join(__dirname, 'db_state.json');
 
-let dbState = { customers: [], shipments: [] };
+let dbState = { customers: [], shipments: [], messages: [] };
 
 function loadDb() {
   try {
     if (fs.existsSync(DB_FILE)) {
       dbState = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+      if (!dbState.messages) dbState.messages = [];
     } else {
       // Initialize with seed data defaults matching seed.js
       dbState = {
@@ -136,6 +150,20 @@ function loadDb() {
               logs: "Signature received. Delivered by cargo team."
             },
             createdAt: new Date().toISOString()
+          }
+        ],
+        messages: [
+          {
+            _id: "msg_seed_1",
+            customerEmail: "customer@ups.com",
+            customerName: "John Doe",
+            subject: "Inquiry regarding Package #UPS-78361092",
+            body: "Hello Support Team,\n\nCan you confirm when package #UPS-78361092 will arrive in Seattle?\n\nThank you,\nJohn Doe",
+            sender: "customer",
+            read: false,
+            messageId: "<msg-customer-01@ups.com>",
+            createdAt: new Date(Date.now() - 3600000 * 2).toISOString(),
+            updatedAt: new Date(Date.now() - 3600000 * 2).toISOString()
           }
         ]
       };
@@ -386,6 +414,101 @@ class MockShipment {
   }
 }
 
+class MockMessage {
+  constructor(data) {
+    Object.assign(this, data);
+    this.read = this.read !== undefined ? this.read : false;
+    this.sender = this.sender || 'customer';
+  }
+  async save() {
+    loadDb();
+    if (!this.customerEmail) throw new Error('Message validation failed: customerEmail required.');
+    this.customerEmail = this.customerEmail.trim().toLowerCase();
+    this.createdAt = this.createdAt || new Date().toISOString();
+    this.updatedAt = new Date().toISOString();
+    this._id = this._id || 'msg_' + Math.random().toString(36).substr(2, 9);
+
+    dbState.messages = dbState.messages || [];
+    const idx = dbState.messages.findIndex(m => m._id === this._id);
+    const docData = { ...this };
+    if (idx >= 0) {
+      dbState.messages[idx] = docData;
+    } else {
+      dbState.messages.push(docData);
+    }
+    saveDb();
+    return this;
+  }
+  static async findOne(query) {
+    loadDb();
+    dbState.messages = dbState.messages || [];
+    let found = null;
+    if (query && query.customerEmail) {
+      const email = String(query.customerEmail).toLowerCase().trim();
+      found = dbState.messages.find(m => m.customerEmail === email);
+    } else if (query && query._id) {
+      found = dbState.messages.find(m => m._id === query._id);
+    }
+    return found ? new MockMessage(found) : null;
+  }
+  static find(query) {
+    loadDb();
+    dbState.messages = dbState.messages || [];
+    let results = [...dbState.messages];
+    if (query) {
+      if (query.customerEmail) {
+        const email = String(query.customerEmail).toLowerCase().trim();
+        results = results.filter(m => m.customerEmail === email);
+      }
+      if (query.read !== undefined) {
+        results = results.filter(m => m.read === query.read);
+      }
+    }
+    return new MockQuery(results.map(m => new MockMessage(m)));
+  }
+  static async updateMany(query, update) {
+    loadDb();
+    dbState.messages = dbState.messages || [];
+    let count = 0;
+    const email = query && query.customerEmail ? String(query.customerEmail).toLowerCase().trim() : null;
+    const sender = query && query.sender ? query.sender : null;
+
+    for (let i = 0; i < dbState.messages.length; i++) {
+      let match = true;
+      if (email && dbState.messages[i].customerEmail !== email) match = false;
+      if (sender && dbState.messages[i].sender !== sender) match = false;
+      if (query && query.read !== undefined && dbState.messages[i].read !== query.read) match = false;
+
+      if (match) {
+        if (update && update.$set) {
+          Object.assign(dbState.messages[i], update.$set);
+        } else if (update) {
+          Object.assign(dbState.messages[i], update);
+        }
+        dbState.messages[i].updatedAt = new Date().toISOString();
+        count++;
+      }
+    }
+    saveDb();
+    return { modifiedCount: count };
+  }
+  static async countDocuments(query) {
+    loadDb();
+    dbState.messages = dbState.messages || [];
+    let results = [...dbState.messages];
+    if (query) {
+      if (query.customerEmail) {
+        const email = String(query.customerEmail).toLowerCase().trim();
+        results = results.filter(m => m.customerEmail === email);
+      }
+      if (query.read !== undefined) {
+        results = results.filter(m => m.read === query.read);
+      }
+    }
+    return results.length;
+  }
+}
+
 // Proxies to route calls depending on global.useDbMock
 const modelProxy = (RealModel, MockModel) => {
   return new Proxy(class {}, {
@@ -406,3 +529,4 @@ const modelProxy = (RealModel, MockModel) => {
 
 export const Customer = modelProxy(RealCustomer, MockCustomer);
 export const Shipment = modelProxy(RealShipment, MockShipment);
+export const Message = modelProxy(RealMessage, MockMessage);

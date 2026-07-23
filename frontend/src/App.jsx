@@ -4,7 +4,7 @@ import 'leaflet/dist/leaflet.css';
 import { 
   Truck, Plane, Ship, Activity, ClipboardList, PlusCircle, CheckCircle, 
   MapPin, LogOut, ArrowRight, Eye, EyeOff, Shield, Users, Package, RefreshCw, Mail, Lock,
-  SlidersHorizontal, Download, Printer, Search, Trash
+  SlidersHorizontal, Download, Printer, Search, Trash, MessageSquare
 } from 'lucide-react';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 
@@ -491,6 +491,315 @@ const EmailCenterView = ({ shipments, API_BASE }) => {
   );
 };
 
+const MessagesView = ({ messages, API_BASE, onMarkRead }) => {
+  const [selectedEmail, setSelectedEmail] = useState('');
+  const [replyBody, setReplyBody] = useState('');
+  const [replySubject, setReplySubject] = useState('');
+  const [sending, setSending] = useState(false);
+  const [feedback, setFeedback] = useState({ type: '', text: '' });
+  const [filterSearch, setFilterSearch] = useState('');
+
+  // Group messages by customerEmail
+  const conversations = React.useMemo(() => {
+    const groups = {};
+    (messages || []).forEach(m => {
+      const email = m.customerEmail ? m.customerEmail.toLowerCase().trim() : 'unknown@ups.com';
+      if (!groups[email]) {
+        groups[email] = {
+          email,
+          name: m.customerName || email.split('@')[0],
+          messages: [],
+          unreadCount: 0,
+          lastMsg: m
+        };
+      }
+      groups[email].messages.push(m);
+      if (m.sender === 'customer' && !m.read) {
+        groups[email].unreadCount += 1;
+      }
+    });
+
+    return Object.values(groups).sort((a, b) => {
+      const timeA = new Date(a.lastMsg.createdAt || a.lastMsg.updatedAt || 0).getTime();
+      const timeB = new Date(b.lastMsg.createdAt || b.lastMsg.updatedAt || 0).getTime();
+      return timeB - timeA;
+    });
+  }, [messages]);
+
+  useEffect(() => {
+    if (conversations.length > 0 && !selectedEmail) {
+      setSelectedEmail(conversations[0].email);
+    }
+  }, [conversations, selectedEmail]);
+
+  useEffect(() => {
+    if (!selectedEmail) return;
+    const targetConv = conversations.find(c => c.email === selectedEmail);
+    if (targetConv && targetConv.unreadCount > 0) {
+      onMarkRead(selectedEmail);
+    }
+    const lastMsg = targetConv?.messages[targetConv.messages.length - 1];
+    if (lastMsg && lastMsg.subject) {
+      const subj = lastMsg.subject.startsWith('Re:') ? lastMsg.subject : `Re: ${lastMsg.subject}`;
+      setReplySubject(subj);
+    } else {
+      setReplySubject('Re: Customer Inquiry');
+    }
+  }, [selectedEmail, conversations, onMarkRead]);
+
+  const activeConv = conversations.find(c => c.email === selectedEmail);
+  const sortedActiveMsgs = React.useMemo(() => {
+    if (!activeConv) return [];
+    return [...activeConv.messages].sort((a, b) => new Date(a.createdAt || 0).getTime() - new Date(b.createdAt || 0).getTime());
+  }, [activeConv]);
+
+  const latestCustomerMsg = React.useMemo(() => {
+    if (!sortedActiveMsgs.length) return null;
+    const custMsgs = sortedActiveMsgs.filter(m => m.sender === 'customer');
+    return custMsgs.length > 0 ? custMsgs[custMsgs.length - 1] : sortedActiveMsgs[sortedActiveMsgs.length - 1];
+  }, [sortedActiveMsgs]);
+
+  const handleSendReply = async (e) => {
+    e.preventDefault();
+    if (!selectedEmail || !replyBody.trim()) return;
+
+    setSending(true);
+    setFeedback({ type: '', text: '' });
+
+    try {
+      const res = await fetch(`${API_BASE}/admin/messages/reply`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customerEmail: selectedEmail,
+          customerName: activeConv?.name || selectedEmail.split('@')[0],
+          subject: replySubject,
+          body: replyBody.trim(),
+          inReplyTo: latestCustomerMsg?.messageId || ''
+        })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setReplyBody('');
+        setFeedback({
+          type: 'success',
+          text: data.emailSent ? 'Reply dispatched to customer via email!' : 'Reply recorded in portal.'
+        });
+      } else {
+        setFeedback({ type: 'error', text: data.error || 'Failed to dispatch reply.' });
+      }
+    } catch (err) {
+      setFeedback({ type: 'error', text: 'Error connecting to messaging server.' });
+    } finally {
+      setSending(false);
+    }
+  };
+
+  const filteredConversations = conversations.filter(c => 
+    c.email.toLowerCase().includes(filterSearch.toLowerCase()) || 
+    c.name.toLowerCase().includes(filterSearch.toLowerCase())
+  );
+
+  return (
+    <section className="messages-view" style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+        <div>
+          <h2 style={{ fontSize: '24px', fontWeight: '800', color: '#1a202c', margin: 0 }}>Customer Support Inbox</h2>
+          <p style={{ color: '#718096', fontSize: '14px', margin: '4px 0 0 0' }}>
+            Real-time inbound customer inquiries & threaded email responses
+          </p>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '340px 1fr', gap: '20px', minHeight: '650px' }}>
+        
+        {/* Left Column: Conversation List */}
+        <div style={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{ padding: '16px', borderBottom: '1px solid #edf2f7', background: '#f8fafc' }}>
+            <input 
+              type="text"
+              placeholder="Search conversations..."
+              value={filterSearch}
+              onChange={(e) => setFilterSearch(e.target.value)}
+              style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e0', fontSize: '13px', outline: 'none' }}
+            />
+          </div>
+
+          <div style={{ overflowY: 'auto', flex: 1 }}>
+            {filteredConversations.length === 0 ? (
+              <div style={{ padding: '32px', textAlign: 'center', color: '#a0aec0', fontSize: '14px' }}>
+                No active support threads.
+              </div>
+            ) : (
+              filteredConversations.map(conv => {
+                const isSelected = conv.email === selectedEmail;
+                return (
+                  <div
+                    key={conv.email}
+                    onClick={() => setSelectedEmail(conv.email)}
+                    style={{
+                      padding: '14px 16px',
+                      borderBottom: '1px solid #edf2f7',
+                      cursor: 'pointer',
+                      backgroundColor: isSelected ? '#edf2f7' : (conv.unreadCount > 0 ? '#fffaf0' : '#ffffff'),
+                      transition: 'background 0.15s ease',
+                      borderLeft: isSelected ? '4px solid #351C15' : '4px solid transparent'
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
+                      <span style={{ fontWeight: '700', fontSize: '14px', color: '#2d3748', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }}>
+                        {conv.name}
+                      </span>
+                      {conv.unreadCount > 0 && (
+                        <span style={{ backgroundColor: '#e53e3e', color: '#fff', fontSize: '11px', fontWeight: '800', padding: '2px 6px', borderRadius: '10px' }}>
+                          {conv.unreadCount} NEW
+                        </span>
+                      )}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#718096', marginBottom: '4px', fontFamily: 'monospace' }}>
+                      {conv.email}
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#4a5568', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                      {conv.lastMsg.body ? conv.lastMsg.body.substring(0, 45) + '...' : 'New message'}
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Chat Thread & Reply Form */}
+        <div style={{ background: '#ffffff', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          {!activeConv ? (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', flex: 1, color: '#a0aec0' }}>
+              Select a conversation to view support history.
+            </div>
+          ) : (
+            <>
+              {/* Thread Header */}
+              <div style={{ padding: '16px 20px', borderBottom: '1px solid #edf2f7', background: '#351C15', color: '#ffffff', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <h3 style={{ margin: 0, fontSize: '16px', fontWeight: '700' }}>{activeConv.name}</h3>
+                  <span style={{ fontSize: '12px', opacity: 0.85, fontFamily: 'monospace' }}>{activeConv.email}</span>
+                </div>
+                <span style={{ fontSize: '12px', background: 'rgba(255,255,255,0.15)', padding: '4px 10px', borderRadius: '4px' }}>
+                  {sortedActiveMsgs.length} messages
+                </span>
+              </div>
+
+              {/* Message Feed */}
+              <div style={{ flex: 1, padding: '20px', overflowY: 'auto', background: '#f7fafc', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                {sortedActiveMsgs.map((m, index) => {
+                  const isAdmin = m.sender === 'admin';
+                  return (
+                    <div
+                      key={m._id || index}
+                      style={{
+                        alignSelf: isAdmin ? 'flex-end' : 'flex-start',
+                        maxWidth: '80%',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: isAdmin ? 'flex-end' : 'flex-start'
+                      }}
+                    >
+                      <div style={{ fontSize: '11px', color: '#718096', marginBottom: '4px', display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <span style={{ fontWeight: '700', color: isAdmin ? '#d89600' : '#2b6cb0' }}>
+                          {isAdmin ? 'UPS Support Admin' : m.customerName}
+                        </span>
+                        <span>•</span>
+                        <span>{new Date(m.createdAt || Date.now()).toLocaleString()}</span>
+                      </div>
+                      <div
+                        style={{
+                          background: isAdmin ? '#351C15' : '#ffffff',
+                          color: isAdmin ? '#ffffff' : '#2d3748',
+                          padding: '14px 16px',
+                          borderRadius: isAdmin ? '12px 12px 0 12px' : '12px 12px 12px 0',
+                          border: isAdmin ? '1px solid #d89600' : '1px solid #e2e8f0',
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.05)',
+                          fontSize: '14px',
+                          lineHeight: '1.5',
+                          whiteSpace: 'pre-wrap'
+                        }}
+                      >
+                        {m.subject && (
+                          <div style={{ fontWeight: '700', fontSize: '13px', marginBottom: '6px', opacity: 0.9, borderBottom: isAdmin ? '1px solid rgba(255,255,255,0.2)' : '1px solid #edf2f7', paddingBottom: '4px' }}>
+                            {m.subject}
+                          </div>
+                        )}
+                        {m.body}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Reply Box */}
+              <div style={{ padding: '16px', borderTop: '1px solid #edf2f7', background: '#ffffff' }}>
+                {feedback.text && (
+                  <div style={{
+                    padding: '8px 12px',
+                    borderRadius: '4px',
+                    marginBottom: '12px',
+                    fontSize: '13px',
+                    backgroundColor: feedback.type === 'error' ? '#fff5f5' : '#f0fff4',
+                    color: feedback.type === 'error' ? '#c53030' : '#276749',
+                    border: `1px solid ${feedback.type === 'error' ? '#feb2b2' : '#9ae6b4'}`
+                  }}>
+                    {feedback.text}
+                  </div>
+                )}
+
+                <form onSubmit={handleSendReply} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                  <input 
+                    type="text"
+                    value={replySubject}
+                    onChange={(e) => setReplySubject(e.target.value)}
+                    placeholder="Subject..."
+                    style={{ padding: '8px 12px', borderRadius: '4px', border: '1px solid #cbd5e0', fontSize: '13px', outline: 'none' }}
+                  />
+                  <textarea 
+                    rows="3"
+                    value={replyBody}
+                    onChange={(e) => setReplyBody(e.target.value)}
+                    placeholder="Type your response to client..."
+                    style={{ padding: '10px 12px', borderRadius: '4px', border: '1px solid #cbd5e0', fontSize: '14px', outline: 'none', resize: 'vertical', fontFamily: 'inherit' }}
+                  />
+                  <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                    <button
+                      type="submit"
+                      disabled={sending || !replyBody.trim()}
+                      style={{
+                        backgroundColor: '#351C15',
+                        color: '#ffffff',
+                        fontWeight: '700',
+                        fontSize: '14px',
+                        padding: '10px 24px',
+                        borderRadius: '4px',
+                        border: 'none',
+                        cursor: (sending || !replyBody.trim()) ? 'not-allowed' : 'pointer',
+                        opacity: (sending || !replyBody.trim()) ? 0.6 : 1,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      {sending ? 'Sending Reply...' : 'Send Email Reply →'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </>
+          )}
+        </div>
+
+      </div>
+    </section>
+  );
+};
+
 
 const getValidSession = () => {
   try {
@@ -523,8 +832,20 @@ export default function App() {
 
   const [activeTab, setActiveTab] = useState('home');
   const [shipments, setShipments] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [isFlashing, setIsFlashing] = useState(false);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+
+  const unreadCount = messages.filter(m => m.sender === 'customer' && !m.read).length;
+
+  useEffect(() => {
+    if (user && user.role === 'admin') {
+      fetch(`${API_BASE}/messages`)
+        .then(res => res.ok ? res.json() : [])
+        .then(data => setMessages(Array.isArray(data) ? data : []))
+        .catch(err => console.error('Error fetching messages:', err));
+    }
+  }, [user, activeTab]);
 
   useEffect(() => {
     setMobileSidebarOpen(false);
@@ -624,7 +945,7 @@ export default function App() {
       }
 
       // Protected route check
-      if (!currentUser && ['admin', 'dashboard', 'appointment', 'email-center'].includes(targetTab)) {
+      if (!currentUser && ['admin', 'dashboard', 'appointment', 'email-center', 'messages'].includes(targetTab)) {
         setActiveTab('home');
         if (window.location.hash !== '#home') {
           window.location.hash = '#home';
@@ -738,6 +1059,13 @@ export default function App() {
                 window.location.hash = user && user.role === 'admin' ? '#admin' : '#dashboard';
               }
             }
+          } else if (msg.type === 'NEW_MESSAGE') {
+            const newMsg = msg.payload;
+            setMessages(prev => {
+              const exists = prev.some(m => m._id === newMsg._id);
+              if (exists) return prev;
+              return [newMsg, ...prev];
+            });
           }
         } catch (error) {
           console.warn('Socket message parse error:', error);
@@ -1350,6 +1678,22 @@ export default function App() {
                   </a>
                   <a href="#tracking" className={`sidebar-link ${activeTab === 'tracking' ? 'active' : ''}`}>
                     <ClipboardList className="nav-icon" /> Shipments
+                  </a>
+                  <a href="#messages" className={`sidebar-link ${activeTab === 'messages' ? 'active' : ''}`}>
+                    <MessageSquare className="nav-icon" /> Messages
+                    {unreadCount > 0 && (
+                      <span style={{
+                        marginLeft: 'auto',
+                        backgroundColor: '#e53e3e',
+                        color: '#ffffff',
+                        fontSize: '0.7rem',
+                        fontWeight: '800',
+                        padding: '2px 6px',
+                        borderRadius: '10px'
+                      }}>
+                        {unreadCount}
+                      </span>
+                    )}
                   </a>
                   <a href="#email-center" className={`sidebar-link ${activeTab === 'email-center' ? 'active' : ''}`}>
                     <Mail className="nav-icon" /> Email Center
@@ -3364,6 +3708,25 @@ export default function App() {
 
           {activeTab === 'email-center' && user?.role === 'admin' && (
             <EmailCenterView shipments={shipments} API_BASE={API_BASE} />
+          )}
+
+          {activeTab === 'messages' && user?.role === 'admin' && (
+            <MessagesView 
+              messages={messages} 
+              API_BASE={API_BASE} 
+              onMarkRead={async (email) => {
+                try {
+                  await fetch(`${API_BASE}/messages/read`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ customerEmail: email })
+                  });
+                  setMessages(prev => prev.map(m => (m.customerEmail === email && m.sender === 'customer') ? { ...m, read: true } : m));
+                } catch (e) {
+                  console.error('Failed marking messages read:', e);
+                }
+              }}
+            />
           )}
 
         </main>

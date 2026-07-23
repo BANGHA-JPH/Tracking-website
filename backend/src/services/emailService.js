@@ -80,7 +80,7 @@ function buildHtmlEmail({ recipientName, title, message, trackingNumber, status,
 /**
  * Main email sender service
  */
-export async function sendEmail({ to, recipientName, subject, messageBody, templateType, shipment, credentials }) {
+export async function sendEmail({ to, recipientName, subject, messageBody, templateType, shipment, credentials, inReplyTo }) {
   const apiKey = process.env.RESEND_API_KEY;
   const fromEmail = process.env.FROM_EMAIL || 'UPS Support <support@ups-global-shipping.com>';
 
@@ -115,6 +115,14 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
 
   try {
     const resend = new Resend(apiKey);
+    const emailHeaders = {
+      'X-Entity-Ref-ID': `UPS-MSG-${Date.now()}`
+    };
+    if (inReplyTo) {
+      emailHeaders['In-Reply-To'] = inReplyTo;
+      emailHeaders['References'] = inReplyTo;
+    }
+
     const response = await resend.emails.send({
       from: fromEmail,
       to: [to],
@@ -122,9 +130,7 @@ export async function sendEmail({ to, recipientName, subject, messageBody, templ
       subject: emailSubject,
       html: html,
       text: textContent,
-      headers: {
-        'X-Entity-Ref-ID': `UPS-MSG-${Date.now()}`
-      }
+      headers: emailHeaders
     });
 
     if (response.error) {
